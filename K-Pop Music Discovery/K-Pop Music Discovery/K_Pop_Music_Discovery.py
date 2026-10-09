@@ -1,4 +1,14 @@
+import sqlite3
 import tkinter as tk
+
+def init_db():
+    # Connect to the SQLite database
+    conn = sqlite3.connect("kpop_music.db")
+    cursor = conn.cursor()
+
+    cursor.execute()
+    conn.commit()
+    return conn
 
 def main():
     # Create the main window

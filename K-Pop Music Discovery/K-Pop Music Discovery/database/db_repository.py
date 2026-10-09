@@ -39,7 +39,17 @@ class DatabaseRepository:
             CREATE TABLE IF NOT EXISTS preferences (
                 preference_id INTEGER PRIMARY KEY,
                 preference_type TEXT NOT NULL,
-                preference_value TEXT NOT NULL
+                preference_value TEXT NOT NULL,
+                UNIQUE (preference_type, preference_value)
+            );
+        """)
+
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS recommendations (
+                recommendation_id INTEGER PRIMARY KEY,
+                song_id INTEGER NOT NULL,
+                recommended_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
+                FOREIGN KEY (song_id) REFERENCES songs (song_id),
             );
         """)
         

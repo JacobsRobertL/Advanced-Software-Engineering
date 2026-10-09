@@ -21,26 +21,26 @@
     <EnableUnmanagedDebugging>false</EnableUnmanagedDebugging>
   </PropertyGroup>
   <ItemGroup>
-    <Compile Include="Adapters\lastfm_adapter.py" />
-    <Compile Include="Adapters\musicbrainz_adapter.py" />
-    <Compile Include="Adapters\music_adapter.py" />
-    <Compile Include="Adapters\__init__.py" />
-    <Compile Include="API\lastfm_client.py" />
-    <Compile Include="API\musicbrainz_client.py" />
-    <Compile Include="API\__init__.py" />
-    <Compile Include="Database\db_repository.py" />
-    <Compile Include="Database\__init__.py" />
+    <Compile Include="adapters\lastfm_adapter.py" />
+    <Compile Include="adapters\musicbrainz_adapter.py" />
+    <Compile Include="adapters\music_adapter.py" />
+    <Compile Include="adapters\__init__.py" />
+    <Compile Include="api\lastfm_client.py" />
+    <Compile Include="api\musicbrainz_client.py" />
+    <Compile Include="api\__init__.py" />
+    <Compile Include="database\db_repository.py" />
+    <Compile Include="database\__init__.py" />
     <Compile Include="K_Pop_Music_Discovery.py" />
-    <Compile Include="Models\__init__.py" />
-    <Compile Include="UI\app_window.py" />
-    <Compile Include="UI\__init__.py" />
+    <Compile Include="models\__init__.py" />
+    <Compile Include="ui\app_window.py" />
+    <Compile Include="ui\__init__.py" />
   </ItemGroup>
   <ItemGroup>
-    <Folder Include="Database\" />
-    <Folder Include="API\" />
-    <Folder Include="Models\" />
-    <Folder Include="Adapters\" />
-    <Folder Include="UI\" />
+    <Folder Include="database\" />
+    <Folder Include="api\" />
+    <Folder Include="models\" />
+    <Folder Include="adapters\" />
+    <Folder Include="ui\" />
   </ItemGroup>
   <Import Project="$(MSBuildExtensionsPath32)\Microsoft\VisualStudio\v$(VisualStudioVersion)\Python Tools\Microsoft.PythonTools.targets" />
   <!-- Uncomment the CoreCompile target to enable the Build command in

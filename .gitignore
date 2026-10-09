@@ -1,1 +1,11 @@
+# Python files
+__pycache__/
+*.pyc
+
+# SQLite database files
+*.db
+
+# Local environment and cred
 .vs/
+.env
+.venv/

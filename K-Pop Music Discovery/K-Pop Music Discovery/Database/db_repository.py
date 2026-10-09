@@ -8,6 +8,6 @@ class DatabaseRepository:
         self.database_name = DATABASE_NAME
 
     def initialize_database(self):
-        connections = sqlite3.connect(self.database_name)
+        connection = sqlite3.connect(self.database_name)
         connection.close()
         

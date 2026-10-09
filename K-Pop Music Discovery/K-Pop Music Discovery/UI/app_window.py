@@ -23,4 +23,27 @@ class AppWindow(tk.Tk):
         self._create_widgets()
         self._layout_widgets()
 
+    # TEMP: This only creates the widgets but does not place them.
     def _create_widgets(self):
+        self.title_label = ttk.Label(self, text="K-Pop Music Discovery", font=("Helvetica", 24))
+        
+        self.search_label = ttk.Label(self, text="Let's start with songs you like:")
+        self.search_entry = ttk.Entry(self, textvariable=self.search_var)
+        self.search_button = ttk.Button(self, text="Search", command=self._on_search)
+        
+        self.results_label = ttk.Label(self, text="Results:")
+        self.results_listbox = tk.Listbox(self, height=20, width=80)
+
+    # TEMP: This places the widgets
+    def _layout_widgets(self):
+        self.title_label.pack(pady=20)
+        
+        self.search_label.pack(pady=10)
+        self.search_entry.pack(pady=5)
+        self.search_button.pack(pady=10)
+        
+        self.results_label.pack(pady=10)
+        self.results_listbox.pack(pady=5)
+
+    # TEMP: This is the function that will be called when the search button is clicked.
+    def _on_search(self):

@@ -47,3 +47,17 @@ class AppWindow(tk.Tk):
 
     # TEMP: This is the function that will be called when the search button is clicked.
     def _on_search(self):
+        # TEMP: Grab the term from the box and strip whitespace
+        search_term = self.search_var.get().strip()
+
+        if not search_term:
+            return  # TEMP: Do nothing if the search term is empty
+
+        self._display_results([f"Searching for: {search_term}"])
+
+    # TEMP: This displays the results in the listbox.  As we have not contacted the API yet this is a placeholder
+    def _display_results(self, results):
+        self.results_listbox.delete(0, tk.END)  # Clear previous results
+        
+        for result in results:
+            self.results_listbox.insert(tk.END, result)

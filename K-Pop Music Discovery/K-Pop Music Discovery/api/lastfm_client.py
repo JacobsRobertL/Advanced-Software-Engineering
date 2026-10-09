@@ -24,7 +24,26 @@ def get_artist_info(artist_name):
     response.raise_for_status()
     return response.json()
 
+def get_top_tracks(artist_name):
+    parameters = {
+        "method": "artist.gettoptracks",
+        "artist": artist_name,
+        "api_key": API_KEY,
+        "format": "json",
+        "limit": 10
+    }
+    response = requests.get(BASE_URL, params=parameters, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
+#if __name__ == "__main__":
+#    artist_name = "BTS"
+#    artist_info = get_artist_info(artist_name)
+#    print(artist_info)
+
 if __name__ == "__main__":
     artist_name = "BTS"
     artist_info = get_artist_info(artist_name)
     print(artist_info)
+    top_tracks = get_top_tracks(artist_name)
+    print(top_tracks)

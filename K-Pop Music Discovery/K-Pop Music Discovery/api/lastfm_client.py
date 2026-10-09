@@ -4,7 +4,7 @@ from pathlib import Path
 import requests
 from dotenv import load_dotenv
 
-ENV_PATH = Path(__file__).resolve().parent.parent / ".env
+ENV_PATH = Path(__file__).resolve().parent.parent / ".env"
 
 load_dotenv(dotenv_path=ENV_PATH)
 
@@ -23,3 +23,8 @@ def get_artist_info(artist_name):
     response = requests.get(BASE_URL, params=parameters, timeout=10)
     response.raise_for_status()
     return response.json()
+
+if __name__ == "__main__":
+    artist_name = "BTS"
+    artist_info = get_artist_info(artist_name)
+    print(artist_info)

@@ -6,8 +6,6 @@ def init_db():
     conn = sqlite3.connect("kpop_music.db")
     cursor = conn.cursor()
 
-    #test
-    #test
 
     cursor.execute()
     conn.commit()

@@ -24,12 +24,22 @@ class DatabaseRepository:
         """)
 
         # TEMP: Create a ratings table and associate it with song ID
+        # TEMP: Added a rating check which means that I need to delete the local DBRepo to recreate with new params.
         connection.execute("""
             CREATE TABLE IF NOT EXISTS ratings (
                 rating_id INTEGER PRIMARY KEY,
-                song_id INTEGER NOT NULL,
-                rating INTEGER NOT NULL,
+                song_id INTEGER NOT NULL UNIQUE,
+                rating INTEGER NOT NULL CHECK (rating >= 1 AND rating <= 5),
                 FOREIGN KEY (song_id) REFERENCES songs (song_id)
+            );
+        """)
+
+        # TEMP: Create a preference table that associates a type with a value.
+        connection.execute("""
+            CREATE TABLE IF NOT EXISTS preferences (
+                preference_id INTEGER PRIMARY KEY,
+                preference_type TEXT NOT NULL,
+                preference_value TEXT NOT NULL
             );
         """)
         

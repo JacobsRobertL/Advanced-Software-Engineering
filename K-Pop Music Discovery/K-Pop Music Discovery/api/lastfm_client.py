@@ -41,9 +41,16 @@ def get_top_tracks(artist_name):
 #    artist_info = get_artist_info(artist_name)
 #    print(artist_info)
 
+#if __name__ == "__main__":
+#    artist_name = "BTS"
+#    artist_info = get_artist_info(artist_name)
+#    print(artist_info)
+#    top_tracks = get_top_tracks(artist_name)
+#    print(top_tracks)
+
+# TEMP: test to try and filter just the track names from the JSON
 if __name__ == "__main__":
-    artist_name = "BTS"
-    artist_info = get_artist_info(artist_name)
-    print(artist_info)
-    top_tracks = get_top_tracks(artist_name)
-    print(top_tracks)
+    track_data = get_top_tracks("BTS")
+
+    for track in track_data["toptracks"]["track"]:
+        print(track["name"])

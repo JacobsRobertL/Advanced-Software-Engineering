@@ -29,6 +29,10 @@ class AppWindow(tk.Tk):
         self._create_widgets()
         self._layout_widgets()
 
+        # TEMP: Test loading profile from the database
+        self.preference_profile = self._load_preference_profile()
+        print("Initial preference profile:", self.preference_profile)
+
     # TEMP: This only creates the widgets but does not place them.
     def _create_widgets(self):
         self.title_label = ttk.Label(self, text="K-Pop Music Discovery", font=("Helvetica", 24))
@@ -93,3 +97,20 @@ class AppWindow(tk.Tk):
         print(f"Preference added: {preference}")  # TEMP: Placeholder for actual functionality
 
         self.preference_var.set("")  # Clear the entry after adding preference
+
+        self.preference_profile = self._load_preference_profile()  # Reload the preference profile
+
+
+    def _load_preference_profile(self):
+        preferences = self.db_repo.get_preferences()
+        self.preference_listbox.delete(0, tk.END)  # Clear previous preferences
+
+        profile = {"artists": [], "tags": []}
+        
+        for preference_type, preference_value in preferences:
+            if preference_type == "artist":  # TEMP: Assuming we only care about artist preferences for now
+                profile["artists"].append(preference_value)
+            elif preference_type == "tag":  # TEMP: Assuming we only care about tag preferences for now
+                profile["tags"].append(preference_value)
+
+        return profile

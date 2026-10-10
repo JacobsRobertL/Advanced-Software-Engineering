@@ -1,7 +1,13 @@
+import os
 import sqlite3
 from pathlib import Path
 
-DATABASE_NAME = Path(__file__).resolve().parent / "kpop_discovery.db"
+#DATABASE_NAME = Path(__file__).resolve().parent / "kpop_discovery.db"
+
+# TEMP: This is for submission
+APP_DATA = Path(os.getenv("LOCALAPPDATA", Path.home())) / "K-Pop Music Discovery"
+APP_DATA.mkdir(parents=True, exist_ok=True)
+DATABASE_NAME = APP_DATA / "kpop_discovery.db"
 
 class DatabaseRepository:
 

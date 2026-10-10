@@ -65,3 +65,11 @@ class DatabaseRepository:
         
         connection.commit()
         connection.close()
+
+    def get_preferences(self):
+        connection = sqlite3.connect(self.database_name)
+        cursor = connection.cursor()
+        cursor.execute("SELECT preference_type, preference_value FROM preferences ORDER BY preference_type, preference_value")
+        preferences = cursor.fetchall()
+        connection.close()
+        return preferences

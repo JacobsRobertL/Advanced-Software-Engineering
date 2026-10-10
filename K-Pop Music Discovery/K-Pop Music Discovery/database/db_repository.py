@@ -49,9 +49,19 @@ class DatabaseRepository:
                 recommendation_id INTEGER PRIMARY KEY,
                 song_id INTEGER NOT NULL,
                 recommended_at TEXT NOT NULL DEFAULT CURRENT_TIMESTAMP,
-                FOREIGN KEY (song_id) REFERENCES songs (song_id),
+                FOREIGN KEY (song_id) REFERENCES songs (song_id)
             );
         """)
         
         connection.close()
         
+    def add_preference(self, preference_type, preference_value):
+        connection = sqlite3.connect(self.database_name)
+
+        connection.execute("""
+                INSERT OR IGNORE INTO preferences (preference_type, preference_value)
+                VALUES (?, ?)
+            """, (preference_type, preference_value))
+        
+        connection.commit()
+        connection.close()

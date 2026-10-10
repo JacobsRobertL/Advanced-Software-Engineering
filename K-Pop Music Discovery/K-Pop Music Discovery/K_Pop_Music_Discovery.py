@@ -5,7 +5,7 @@ def main():
     db_repo = DatabaseRepository()
     db_repo.initialize_database()
 
-    app = AppWindow()
+    app = AppWindow(db_repo)
     app.mainloop()
 
 if __name__ == "__main__":

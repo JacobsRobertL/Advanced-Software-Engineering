@@ -19,4 +19,7 @@ def search_artist(artist_name):
 if __name__ == "__main__":
     artist_name = "BTS"
     result = search_artist(artist_name)
-    print(result)
+    #print(result)
+
+    for artist in result.get("artists", []):
+        print(artist["name"])

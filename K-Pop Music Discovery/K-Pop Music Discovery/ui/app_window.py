@@ -5,14 +5,20 @@ from tkinter import ttk
 
 # Window presets
 WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 600
+WINDOW_HEIGHT = 650
 WINDOW_TITLE = "K-Pop Music Discovery"
 
 # Creating the main application window class
 class AppWindow(tk.Tk):
-    def __init__(self):
+    def __init__(self, db_repo):
+        
         # TEMP: This is calling the base class constructor to initialize the Tkinter window.  Similar to C++
         super().__init__()
+
+
+        self.db_repo = db_repo
+
+
         self.title(WINDOW_TITLE)
         self.geometry(f"{WINDOW_WIDTH}x{WINDOW_HEIGHT}")
         self.resizable(False, False)
@@ -32,13 +38,14 @@ class AppWindow(tk.Tk):
         self.search_button = ttk.Button(self, text="Search", command=self._on_search)
         
         self.results_label = ttk.Label(self, text="Results:")
-        self.results_listbox = tk.Listbox(self, height=20, width=80)
+        self.results_listbox = tk.Listbox(self, height=8)
 
     # TEMP: Adding preference widgets
         self.preference_var = tk.StringVar()
         self.preference_label = ttk.Label(self, text="Favorite Artist:")
         self.preference_entry = ttk.Entry(self, textvariable=self.preference_var)
         self.add_preference_button = ttk.Button(self, text="Add Preference", command=self._on_add_preference)
+        self.preference_listbox = tk.Listbox(self, height=5)
 
     # TEMP: This places the widgets
     def _layout_widgets(self):
@@ -49,13 +56,14 @@ class AppWindow(tk.Tk):
         self.search_button.pack(pady=10)
         
         self.results_label.pack(pady=10)
-        self.results_listbox.pack(pady=5)
+        self.results_listbox.pack(padx=20, pady=10, fill="x")
 
         # TEMP: Adding preference widgets to the layout
-        self.preference_label.pack(pady=10, 0)
+        self.preference_label.pack(pady=(10, 0))
         self.preference_entry.pack(padx = 20, pady=5, fill=tk.X)
 
         self.add_preference_button.pack(pady=10)
+        self.preference_listbox.pack(padx=20, pady=10, fill="x")
 
     # TEMP: This is the function that will be called when the search button is clicked.
     def _on_search(self):
@@ -73,3 +81,15 @@ class AppWindow(tk.Tk):
         
         for result in results:
             self.results_listbox.insert(tk.END, result)
+
+    # TEMP callback for adding preferences
+    def _on_add_preference(self):
+        preference = self.preference_var.get().strip()
+        if not preference:
+            return  # TEMP: Do nothing if the preference is empty
+        
+        self.db_repo.add_preference("artist", preference)  # TEMP: Assuming "artist" is the type for now
+
+        print(f"Preference added: {preference}")  # TEMP: Placeholder for actual functionality
+
+        self.preference_var.set("")  # Clear the entry after adding preference

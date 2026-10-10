@@ -34,6 +34,12 @@ class AppWindow(tk.Tk):
         self.results_label = ttk.Label(self, text="Results:")
         self.results_listbox = tk.Listbox(self, height=20, width=80)
 
+    # TEMP: Adding preference widgets
+        self.preference_var = tk.StringVar()
+        self.preference_label = ttk.Label(self, text="Favorite Artist:")
+        self.preference_entry = ttk.Entry(self, textvariable=self.preference_var)
+        self.add_preference_button = ttk.Button(self, text="Add Preference", command=self._on_add_preference)
+
     # TEMP: This places the widgets
     def _layout_widgets(self):
         self.title_label.pack(pady=20)
@@ -44,6 +50,12 @@ class AppWindow(tk.Tk):
         
         self.results_label.pack(pady=10)
         self.results_listbox.pack(pady=5)
+
+        # TEMP: Adding preference widgets to the layout
+        self.preference_label.pack(pady=10, 0)
+        self.preference_entry.pack(padx = 20, pady=5, fill=tk.X)
+
+        self.add_preference_button.pack(pady=10)
 
     # TEMP: This is the function that will be called when the search button is clicked.
     def _on_search(self):

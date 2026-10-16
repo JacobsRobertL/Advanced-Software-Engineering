@@ -17,3 +17,12 @@ def get_candidate_tracks(artist_name, fetch_tracks):
     response = fetch_tracks(artist_name)
     return parse_track_data(response)
 
+if __name__ == "__main__":  #For testing purposes outside of a unit test framework
+    from api.lastfm_client import get_top_tracks
+
+    candidates = get_candidate_tracks("Aespa", get_top_tracks)
+
+    for candidate in candidates:
+        print(candidate)
+
+

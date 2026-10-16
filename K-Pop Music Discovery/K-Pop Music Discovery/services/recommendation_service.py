@@ -12,3 +12,8 @@ def parse_track_data(response):
             candidates.append({"title": title, "artist": artist})
 
     return candidates
+
+def get_candidate_tracks(artist_name, fetch_tracks):
+    response = fetch_tracks(artist_name)
+    return parse_track_data(response)
+

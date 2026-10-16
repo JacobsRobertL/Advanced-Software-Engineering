@@ -33,6 +33,7 @@
     <Compile Include="K_Pop_Music_Discovery.py" />
     <Compile Include="models\__init__.py" />
     <Compile Include="services\recommendation_service.py" />
+    <Compile Include="tests\test_recommendation_service.py" />
     <Compile Include="ui\app_window.py" />
     <Compile Include="ui\__init__.py" />
   </ItemGroup>
@@ -41,6 +42,7 @@
     <Folder Include="api\" />
     <Folder Include="models\" />
     <Folder Include="adapters\" />
+    <Folder Include="tests\" />
     <Folder Include="services\" />
     <Folder Include="ui\" />
   </ItemGroup>

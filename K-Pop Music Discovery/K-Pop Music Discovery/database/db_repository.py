@@ -98,3 +98,28 @@ class DatabaseRepository:
         
         connection.commit()
         connection.close()
+
+    def get_recommendation_history(self):
+        connection = sqlite3.connect(self.database_name)
+        cursor = connection.cursor()
+        cursor.execute("""
+            SELECT 
+                songs.title, 
+                songs.artist, 
+                recommendations.recommended_at
+            FROM recommendations
+            JOIN songs 
+                ON recommendations.song_id = songs.song_id
+            ORDER BY recommendations.recommendation_id DESC
+        """)
+        history = cursor.fetchall()
+        connection.close()
+        return history
+
+if __name__ == "__main__":
+    db = DatabaseRepository()
+
+    history = db.get_recommendation_history()
+
+    for title, artist, recommended_at in history:
+        print(f"{recommended_at} | {artist} - {title}")

@@ -80,6 +80,10 @@ def remove_unusable_tracks(recommendations):
 
     return valid
 
+def save_generated_recommendations(recommendations, save_recommendation):
+    for track in recommendations:
+        save_recommendation(track["title"], track["artist"])
+
 if __name__ == "__main__":  #For testing purposes outside of a unit test framework
     # TEMP
     # artists = ["XG", "NewJeans", "Mamamoo"]

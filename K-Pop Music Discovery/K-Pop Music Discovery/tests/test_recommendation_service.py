@@ -1,4 +1,4 @@
-from services.recommendation_service import get_candidate_tracks, generate_recommendations
+from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist
 
 def test_get_candidate_tracks():
     # Mock the fetch_tracks function to return a predefined response
@@ -39,3 +39,15 @@ def test_generate_recommendations():
        {"title": "XG Song", "artist": "XG"},
        {"title": "NewJeans Song", "artist": "NewJeans"}
    ]
+
+def test_filter_by_artist():
+    recommendations = [
+        {"title": "Song 1", "artist": "XG"},
+        {"title": "Song 2", "artist": "NewJeans"},
+        {"title": "Song 3", "artist": "Mamamoo"},
+    ]
+    filtered = filter_by_artist(recommendations, ["XG", "NewJeans"])
+    assert filtered == [
+        {"title": "Song 1", "artist": "XG"},
+        {"title": "Song 2", "artist": "NewJeans"}
+    ]

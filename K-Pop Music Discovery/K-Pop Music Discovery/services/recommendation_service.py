@@ -27,12 +27,25 @@ def generate_recommendations(artist_names, fetch_tracks):
 
     return recommendations
 
+def filter_by_artist(recommendations, artist_name):
+    filtered = []
+    
+    for track in recommendations:
+        artist = track["artist"]
+        
+        if artist.lower() in [name.lower() for name in artist_name]:
+            filtered.append(track)
+
+    return filtered
+
 if __name__ == "__main__":  #For testing purposes outside of a unit test framework
-    artists = ["Aespa", "BTS", "Blackpink", "TWICE"]
+    artists = ["XG", "NewJeans", "Mamamoo"]
 
     recommendations = generate_recommendations(artists, get_top_tracks)
 
-    for track in recommendations:
+    filtered = filter_by_artist(recommendations, ["XG", "NewJeans"])
+
+    for track in filtered:
         print(track)
 
     #from api.lastfm_client import get_top_tracks

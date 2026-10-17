@@ -1,4 +1,4 @@
-from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag
+from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag, add_track_tags, remove_unusable_tracks
 
 def test_get_candidate_tracks():
     # Mock the fetch_tracks function to return a predefined response
@@ -75,4 +75,46 @@ def test_filter_by_tag():
     assert filtered == [
         {"title": "Song 1", "artist": "XG", "tags": ["k-pop", "rap"]},
         {"title": "Song 2", "artist": "NewJeans", "tags": ["k-pop", "dance"]}
+    ]
+
+def test_add_track_tags():
+    recommendations = [
+        {"title": "WOKE UP", "artist": "XG"},
+        {"title": "Drama", "artist": "aespa"}
+    ]
+    def test_tag_api(artist_name, track_name):
+        if artist_name == "XG" and track_name == "WOKE UP":
+            return {
+                "toptags": {
+                    "tag": [
+                        {"name": "rap"},
+                        {"name": "hip hop"}
+                    ]
+                }
+            }
+
+        return {"toptags": {"tag": []}}  # Return empty tags for other tracks}
+
+    result = add_track_tags(recommendations, test_tag_api)
+    assert result == [
+        {"title": "WOKE UP", "artist": "XG", "tags": ["rap", "hip hop"]},
+        {"title": "Drama", "artist": "aespa", "tags": []}
+    ]
+
+def test_remove_unusable_tracks():
+    recommendations = [
+        {"title": "WOKE UP", "artist": "XG", "tags": ["rap"]},
+        {"title": "", "artist": "aespa"},
+        {"title": "Drama", "artist": ""},
+        {"title": "   ", "artist": "BTS"},
+        {"title": "MASCARA", "artist": "XG", "tags": []},
+        {"artist": "TWICE"},
+        {"title": "Supernova", "artist": None}
+    ]
+
+    result = remove_unusable_tracks(recommendations)
+
+    assert result == [
+        {"title": "WOKE UP", "artist": "XG", "tags": ["rap"]},
+        {"title": "MASCARA", "artist": "XG", "tags": []}
     ]

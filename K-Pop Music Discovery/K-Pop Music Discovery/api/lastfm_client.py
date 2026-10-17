@@ -76,15 +76,16 @@ def get_song_tags(artist_name, track_name):
 #    print(top_tracks)
 
 # TEMP: test to try and filter just the track names from the JSON
-if __name__ == "__main__":
-    # track_data = get_top_tracks("BTS")
 
-    # for track in track_data["toptracks"]["track"]:
-    #     print(track["name"])
+#if __name__ == "__main__":
+# track_data = get_top_tracks("BTS")
+
+# for track in track_data["toptracks"]["track"]:
+#     print(track["name"])
     
-    # TEMP: test tags for a specific song
-    # tag_data = get_song_tags("XG", "Woke Up")
-    # print(tag_data)
+# TEMP: test tags for a specific song
+# tag_data = get_song_tags("XG", "Woke Up")
+# print(tag_data)
 
-    # TEMP
+# TEMP
 

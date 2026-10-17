@@ -68,6 +68,18 @@ def add_track_tags(recommendations, fetch_tags):
     
     return recommendations
 
+def remove_unusable_tracks(recommendations):
+    valid = []
+
+    for track in recommendations:
+        title = track.get("title")
+        artist = track.get("artist")
+
+        if isinstance(title, str) and isinstance(artist, str) and title.strip() and artist.strip():
+            valid.append(track)
+
+    return valid
+
 if __name__ == "__main__":  #For testing purposes outside of a unit test framework
     # TEMP
     # artists = ["XG", "NewJeans", "Mamamoo"]
@@ -106,8 +118,24 @@ if __name__ == "__main__":  #For testing purposes outside of a unit test framewo
     #     print(track)
 
     # TEMP
-    recommendations = generate_recommendations(["XG"], get_top_tracks)
-    recommendations = add_track_tags(recommendations, get_song_tags)
+    # recommendations = generate_recommendations(["XG"], get_top_tracks)
+    # recommendations = add_track_tags(recommendations, get_song_tags)
 
-    for track in recommendations:
+    # filtered = filter_by_tag(recommendations, ["rap", "dance"])
+
+    # for track in filtered:
+    #     print(track)
+
+    # print(f"Matching tracks: {len(filtered)}")
+
+    # TEMP
+    recommendations = [
+    {"title": "WOKE UP", "artist": "XG", "tags": ["rap"]},
+    {"title": "", "artist": "aespa", "tags": ["k-pop"]},
+    {"title": "Drama", "artist": "", "tags": ["dance"]},
+    {"title": "MASCARA", "artist": "XG", "tags": []}
+    ]
+
+    valid_recommendations = remove_unusable_tracks(recommendations)
+    for track in valid_recommendations:
         print(track)

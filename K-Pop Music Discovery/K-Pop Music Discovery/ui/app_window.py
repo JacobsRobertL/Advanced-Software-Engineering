@@ -3,6 +3,9 @@
 import tkinter as tk
 from tkinter import ttk
 
+from api.lastfm_client import get_top_tracks
+from services.recommendation_service import generate_recommendations, save_generated_recommendations
+
 # Window presets
 WINDOW_WIDTH = 800
 WINDOW_HEIGHT = 650
@@ -77,7 +80,31 @@ class AppWindow(tk.Tk):
         if not search_term:
             return  # TEMP: Do nothing if the search term is empty
 
-        self._display_results([f"Searching for: {search_term}"])
+        # Generate recommendations using Last.fm
+        recommendations = generate_recommendations(
+                [search_term],
+                get_top_tracks
+            )
+
+        # Save the recommendations to SQLite
+        save_generated_recommendations(
+                recommendations,
+                self.db_repo.save_recommendation
+            )
+
+        # Display recommendations in Tkinter
+        results = []
+
+        for track in recommendations:
+            results.append(f"{track['artist']} - {track['title']}")
+
+        self._display_results(results)
+
+        # Verify recommendation history in the console
+        print("Recommendation history:")
+
+        for record in self.db_repo.get_recommendation_history():
+            print(record)
 
     # TEMP: This displays the results in the listbox.  As we have not contacted the API yet this is a placeholder
     def _display_results(self, results):

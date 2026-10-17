@@ -25,7 +25,7 @@ load_dotenv(dotenv_path=ENV_PATH)
 
 API_KEY = os.getenv("LASTFM_API_KEY")
 
-BASE_URL = "http://ws.audioscrobbler.com/2.0/"
+BASE_URL = "https://ws.audioscrobbler.com/2.0/"
 
 
 def get_artist_info(artist_name):

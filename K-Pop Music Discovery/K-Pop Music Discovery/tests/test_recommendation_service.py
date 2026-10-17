@@ -118,3 +118,23 @@ def test_remove_unusable_tracks():
         {"title": "WOKE UP", "artist": "XG", "tags": ["rap"]},
         {"title": "MASCARA", "artist": "XG", "tags": []}
     ]
+
+def test_combined_recommendation_filters():
+    recommendations = [
+        {"title": "WOKE UP", "artist": "XG", "tags": ["rap", "hip hop"]},
+        {"title": "LEFT RIGHT", "artist": "XG", "tags": ["rnb", "pop"]},
+        {"title": "Drama", "artist": "aespa", "tags": ["dance", "k-pop"]},
+        {"title": "Dynamite", "artist": "BTS", "tags": ["pop"]},
+        {"title": "", "artist": "XG", "tags": ["rap"]}
+    ]
+
+    filtered = remove_unusable_tracks(recommendations)
+
+    artist_filtered = filter_by_artist(filtered, ["XG", "aespa"])
+
+    tag_filtered = filter_by_tag(artist_filtered, ["rap", "dance"])
+
+    assert tag_filtered == [
+        {"title": "WOKE UP", "artist": "XG", "tags": ["rap", "hip hop"]},
+        {"title": "Drama", "artist": "aespa", "tags": ["dance", "k-pop"]}
+    ]

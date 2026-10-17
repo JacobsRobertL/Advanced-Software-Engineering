@@ -51,6 +51,18 @@ def get_top_tracks(artist_name):
     response.raise_for_status()
     return response.json()
 
+def get_song_tags(artist_name, track_name):
+    parameters = {
+        "method": "track.getTopTags",
+        "artist": artist_name,
+        "track": track_name,
+        "api_key": API_KEY,
+        "format": "json",
+    }
+    response = requests.get(BASE_URL, params=parameters, timeout=10)
+    response.raise_for_status()
+    return response.json()
+
 #if __name__ == "__main__":
 #    artist_name = "BTS"
 #    artist_info = get_artist_info(artist_name)
@@ -65,7 +77,11 @@ def get_top_tracks(artist_name):
 
 # TEMP: test to try and filter just the track names from the JSON
 if __name__ == "__main__":
-    track_data = get_top_tracks("BTS")
+    # track_data = get_top_tracks("BTS")
 
-    for track in track_data["toptracks"]["track"]:
-        print(track["name"])
+    # for track in track_data["toptracks"]["track"]:
+    #     print(track["name"])
+    
+    # TEMP: test tags for a specific song
+    tag_data = get_song_tags("XG", "Woke Up")
+    print(tag_data)

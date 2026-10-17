@@ -13,6 +13,18 @@ def parse_track_data(response):
 
     return candidates
 
+def parse_tag_data(response):
+    tags = response.get("toptags", {}).get("tag", [])
+    tag_list = []
+    
+    for tag in tags:
+        tag_name = tag.get("name")
+        
+        if tag_name:
+            tag_list.append(tag_name)
+
+    return tag_list
+
 def get_candidate_tracks(artist_name, fetch_tracks):
     response = fetch_tracks(artist_name)
     return parse_track_data(response)
@@ -39,15 +51,17 @@ def filter_by_artist(recommendations, artist_name):
     return filtered
 
 if __name__ == "__main__":  #For testing purposes outside of a unit test framework
-    artists = ["XG", "NewJeans", "Mamamoo"]
+    # TEMP
+    # artists = ["XG", "NewJeans", "Mamamoo"]
 
-    recommendations = generate_recommendations(artists, get_top_tracks)
+    # recommendations = generate_recommendations(artists, get_top_tracks)
 
-    filtered = filter_by_artist(recommendations, ["XG", "NewJeans"])
+    # filtered = filter_by_artist(recommendations, ["XG", "NewJeans"])
 
-    for track in filtered:
-        print(track)
+    # for track in filtered:
+    #     print(track)
 
+    # TEMP
     #from api.lastfm_client import get_top_tracks
 
     #candidates = get_candidate_tracks("Aespa", get_top_tracks)
@@ -55,4 +69,9 @@ if __name__ == "__main__":  #For testing purposes outside of a unit test framewo
     #for candidate in candidates:
     #    print(candidate)
 
+    # TEMP
+    from api.lastfm_client import get_song_tags
 
+    tag_data = get_song_tags("XG", "Woke Up")
+    tags = parse_tag_data(tag_data)
+    print(tags)

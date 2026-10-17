@@ -1,4 +1,4 @@
-from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist
+from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data
 
 def test_get_candidate_tracks():
     # Mock the fetch_tracks function to return a predefined response
@@ -51,3 +51,16 @@ def test_filter_by_artist():
         {"title": "Song 1", "artist": "XG"},
         {"title": "Song 2", "artist": "NewJeans"}
     ]
+
+def test_parse_tag_data():
+    response = {
+        "toptags": {
+            "tag": [
+                {"name": "k-pop", "count": 100},
+                {"name": "dance", "count": 80},
+                {"name": "pop", "count": 60}
+            ]
+        }
+    }
+    tags = parse_tag_data(response)
+    assert tags == ["k-pop", "dance", "pop"]

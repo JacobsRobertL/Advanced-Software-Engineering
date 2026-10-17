@@ -50,6 +50,17 @@ def filter_by_artist(recommendations, artist_name):
 
     return filtered
 
+def filter_by_tag(recommendations, tag_name):
+    filtered = []
+    
+    for track in recommendations:
+        for tag in track.get("tags", []):
+            if tag.lower() in [name.lower() for name in tag_name]:
+                filtered.append(track)
+                break
+
+    return filtered
+
 if __name__ == "__main__":  #For testing purposes outside of a unit test framework
     # TEMP
     # artists = ["XG", "NewJeans", "Mamamoo"]
@@ -72,6 +83,17 @@ if __name__ == "__main__":  #For testing purposes outside of a unit test framewo
     # TEMP
     from api.lastfm_client import get_song_tags
 
-    tag_data = get_song_tags("XG", "Woke Up")
-    tags = parse_tag_data(tag_data)
-    print(tags)
+    # tag_data = get_song_tags("XG", "Woke Up")
+    # tags = parse_tag_data(tag_data)
+    # print(tags)
+
+    recommendations = [
+        {"title": "Song 1", "artist": "XG", "tags": ["k-pop", "rap"]},
+        {"title": "Song 2", "artist": "NewJeans", "tags": ["k-pop", "pop"]},
+        {"title": "Song 3", "artist": "Mamamoo", "tags": ["hip-hop", "pop"]}
+    ]
+
+    filtered = filter_by_tag(recommendations, ["hip-hop", "rap"])
+
+    for track in filtered:
+        print(track)

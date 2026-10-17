@@ -102,6 +102,26 @@ def remove_duplicate_recommendations(recommendations):
     return unique_tracks
 
 
+def remove_previously_recommended(recommendations, history):
+    previous_songs = set()
+
+    for title, artist, recommended_at in history:
+        key = (title.strip().casefold(), artist.strip().casefold())
+        previous_songs.add(key)
+
+    filtered = []
+
+    for track in recommendations:
+        key = (
+            track["title"].strip().casefold(),
+            track["artist"].strip().casefold()
+        )
+
+        if key not in previous_songs:
+            filtered.append(track)
+
+    return filtered
+
 if __name__ == "__main__":  #For testing purposes outside of a unit test framework
     # TEMP
     # artists = ["XG", "NewJeans", "Mamamoo"]

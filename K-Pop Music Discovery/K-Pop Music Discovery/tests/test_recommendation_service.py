@@ -1,4 +1,4 @@
-from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag, add_track_tags, remove_unusable_tracks, remove_duplicate_recommendations
+from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag, add_track_tags, remove_unusable_tracks, remove_duplicate_recommendations, remove_previously_recommended
 
 def test_get_candidate_tracks():
     # Mock the fetch_tracks function to return a predefined response
@@ -153,3 +153,21 @@ def test_remove_duplicate_recommendations():
     assert result[0]["title"] == "HOWLING"
     assert result[1]["title"] == "WOKE UP"
     assert result[2]["title"] == "Drama"
+
+def test_remove_previously_recommended():
+    recommendations = [
+        {"title": "HOWLING", "artist": "XG"},
+        {"title": "WOKE UP", "artist": "XG"},
+        {"title": "Drama", "artist": "aespa"}
+    ]
+
+    history = [
+        ("howling", "xg", "2026-10-16 18:45:00"),
+        ("Drama", "aespa", "2026-10-16 18:46:00")
+    ]
+
+    result = remove_previously_recommended(recommendations, history)
+
+    assert len(result) == 1
+    assert result[0]["title"] == "WOKE UP"
+    assert result[0]["artist"] == "XG"

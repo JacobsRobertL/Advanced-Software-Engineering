@@ -4,7 +4,7 @@ import tkinter as tk
 from tkinter import ttk
 
 from api.lastfm_client import get_top_tracks
-from services.recommendation_service import generate_recommendations, save_generated_recommendations
+from services.recommendation_service import generate_recommendations, save_generated_recommendations, remove_duplicate_recommendations, remove_previously_recommended
 
 # Window presets
 WINDOW_WIDTH = 800
@@ -45,7 +45,22 @@ class AppWindow(tk.Tk):
         self.search_button = ttk.Button(self, text="Search", command=self._on_search)
         
         self.results_label = ttk.Label(self, text="Results:")
-        self.results_listbox = tk.Listbox(self, height=8)
+        self.results_frame = ttk.Frame(self)
+
+        self.results_listbox = tk.Listbox(
+            self.results_frame,
+            height=8
+        )
+
+        self.results_scrollbar = ttk.Scrollbar(
+            self.results_frame,
+            orient="vertical",
+            command=self.results_listbox.yview
+        )
+
+        self.results_listbox.configure(
+            yscrollcommand=self.results_scrollbar.set
+        )
 
     # TEMP: Adding preference widgets
         self.preference_var = tk.StringVar()
@@ -63,7 +78,18 @@ class AppWindow(tk.Tk):
         self.search_button.pack(pady=10)
         
         self.results_label.pack(pady=10)
-        self.results_listbox.pack(padx=20, pady=10, fill="x")
+        self.results_frame.pack(padx=20, pady=10, fill="x")
+
+        self.results_listbox.pack(
+            side="left",
+            fill="both",
+            expand=True
+        )
+
+        self.results_scrollbar.pack(
+            side="right",
+            fill="y"
+        )
 
         # TEMP: Adding preference widgets to the layout
         self.preference_label.pack(pady=(10, 0))
@@ -86,6 +112,13 @@ class AppWindow(tk.Tk):
                 get_top_tracks
             )
 
+        recommendations = remove_duplicate_recommendations(recommendations)
+
+        history = self.db_repo.get_recommendation_history()
+
+        recommendations = remove_previously_recommended(recommendations, history)
+
+
         # Save the recommendations to SQLite
         save_generated_recommendations(
                 recommendations,
@@ -98,13 +131,12 @@ class AppWindow(tk.Tk):
         for track in recommendations:
             results.append(f"{track['artist']} - {track['title']}")
 
+        if not results:
+            results.append("No new recommendations available.")
+
         self._display_results(results)
 
-        # Verify recommendation history in the console
-        print("Recommendation history:")
-
-        for record in self.db_repo.get_recommendation_history():
-            print(record)
+        print(f"New recommendations saved: {len(recommendations)}")
 
     # TEMP: This displays the results in the listbox.  As we have not contacted the API yet this is a placeholder
     def _display_results(self, results):

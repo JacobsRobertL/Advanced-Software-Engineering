@@ -1,4 +1,4 @@
-from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag, add_track_tags, remove_unusable_tracks
+from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag, add_track_tags, remove_unusable_tracks, remove_duplicate_recommendations
 
 def test_get_candidate_tracks():
     # Mock the fetch_tracks function to return a predefined response
@@ -7,7 +7,7 @@ def test_get_candidate_tracks():
             "track": [
                 {"name": "Illusion", "artist": {"name": "Aespa"}},
             ]
-           }
+        }
     }
 
     def test_api(artist_name):
@@ -23,22 +23,22 @@ def test_get_candidate_tracks():
 
 def test_generate_recommendations():
     # Mock the fetch_tracks function to return a predefined response
-   def test_api(artist_name):
-       return {
-           "toptracks": {
+    def test_api(artist_name):
+        return {
+            "toptracks": {
                 "track": [
-                     {"name": f"{artist_name} Song", "artist": {"name": artist_name}},
+                            {"name": f"{artist_name} Song", "artist": {"name": artist_name}},
                 ]
-              }
-         }
-   artist_names = ["XG", "NewJeans"]
+                }
+            }
+    artist_names = ["XG", "NewJeans"]
 
-   result = generate_recommendations(artist_names, test_api)
+    result = generate_recommendations(artist_names, test_api)
 
-   assert result == [
-       {"title": "XG Song", "artist": "XG"},
-       {"title": "NewJeans Song", "artist": "NewJeans"}
-   ]
+    assert result == [
+        {"title": "XG Song", "artist": "XG"},
+        {"title": "NewJeans Song", "artist": "NewJeans"}
+    ]
 
 def test_filter_by_artist():
     recommendations = [
@@ -138,3 +138,18 @@ def test_combined_recommendation_filters():
         {"title": "WOKE UP", "artist": "XG", "tags": ["rap", "hip hop"]},
         {"title": "Drama", "artist": "aespa", "tags": ["dance", "k-pop"]}
     ]
+
+def test_remove_duplicate_recommendations():
+    recommendations = [
+        {"title": "HOWLING", "artist": "XG"},
+        {"title": "WOKE UP", "artist": "XG"},
+        {"title": "howling", "artist": "xg"},
+        {"title": "Drama", "artist": "aespa"}
+    ]
+
+    result = remove_duplicate_recommendations(recommendations)
+
+    assert len(result) == 3
+    assert result[0]["title"] == "HOWLING"
+    assert result[1]["title"] == "WOKE UP"
+    assert result[2]["title"] == "Drama"

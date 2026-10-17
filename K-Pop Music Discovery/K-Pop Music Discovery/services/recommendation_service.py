@@ -84,6 +84,24 @@ def save_generated_recommendations(recommendations, save_recommendation):
     for track in recommendations:
         save_recommendation(track["title"], track["artist"])
 
+
+def remove_duplicate_recommendations(recommendations):
+    unique_tracks = []
+    seen = set()
+
+    for track in recommendations:
+        key = (
+            track["title"].strip().casefold(),
+            track["artist"].strip().casefold()
+            )
+
+        if key not in seen:
+            seen.add(key)
+            unique_tracks.append(track)
+
+    return unique_tracks
+
+
 if __name__ == "__main__":  #For testing purposes outside of a unit test framework
     # TEMP
     # artists = ["XG", "NewJeans", "Mamamoo"]

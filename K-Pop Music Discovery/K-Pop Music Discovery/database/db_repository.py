@@ -79,3 +79,22 @@ class DatabaseRepository:
         preferences = cursor.fetchall()
         connection.close()
         return preferences
+
+    def save_recommendation(self, title, artist):
+        connection = sqlite3.connect(self.database_name)
+        cursor = connection.cursor()
+
+        # Check if the song already exists in the songs table
+        cursor.execute("SELECT song_id FROM songs WHERE title = ? AND artist = ?", (title, artist))
+        song = cursor.fetchone()
+        if song:
+            song_id = song[0]
+        else:
+            # Insert the new song into the songs table
+            cursor.execute("INSERT INTO songs (title, artist) VALUES (?, ?)", (title, artist))
+            song_id = cursor.lastrowid
+        # Insert the recommendation into the recommendations table
+        cursor.execute("INSERT INTO recommendations (song_id) VALUES (?)", (song_id,))
+        
+        connection.commit()
+        connection.close()

@@ -83,5 +83,8 @@ if __name__ == "__main__":
     #     print(track["name"])
     
     # TEMP: test tags for a specific song
-    tag_data = get_song_tags("XG", "Woke Up")
-    print(tag_data)
+    # tag_data = get_song_tags("XG", "Woke Up")
+    # print(tag_data)
+
+    # TEMP
+

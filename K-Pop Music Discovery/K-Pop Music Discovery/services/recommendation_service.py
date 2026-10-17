@@ -61,6 +61,13 @@ def filter_by_tag(recommendations, tag_name):
 
     return filtered
 
+def add_track_tags(recommendations, fetch_tags):
+    for track in recommendations:
+        response = fetch_tags(track["artist"], track["title"])
+        track["tags"] = parse_tag_data(response)
+    
+    return recommendations
+
 if __name__ == "__main__":  #For testing purposes outside of a unit test framework
     # TEMP
     # artists = ["XG", "NewJeans", "Mamamoo"]
@@ -87,13 +94,20 @@ if __name__ == "__main__":  #For testing purposes outside of a unit test framewo
     # tags = parse_tag_data(tag_data)
     # print(tags)
 
-    recommendations = [
-        {"title": "Song 1", "artist": "XG", "tags": ["k-pop", "rap"]},
-        {"title": "Song 2", "artist": "NewJeans", "tags": ["k-pop", "pop"]},
-        {"title": "Song 3", "artist": "Mamamoo", "tags": ["hip-hop", "pop"]}
-    ]
+    # recommendations = [
+    #     {"title": "Song 1", "artist": "XG", "tags": ["k-pop", "rap"]},
+    #     {"title": "Song 2", "artist": "NewJeans", "tags": ["k-pop", "pop"]},
+    #     {"title": "Song 3", "artist": "Mamamoo", "tags": ["hip-hop", "pop"]}
+    # ]
 
-    filtered = filter_by_tag(recommendations, ["hip-hop", "rap"])
+    # filtered = filter_by_tag(recommendations, ["hip-hop", "rap"])
 
-    for track in filtered:
+    # for track in filtered:
+    #     print(track)
+
+    # TEMP
+    recommendations = generate_recommendations(["XG"], get_top_tracks)
+    recommendations = add_track_tags(recommendations, get_song_tags)
+
+    for track in recommendations:
         print(track)

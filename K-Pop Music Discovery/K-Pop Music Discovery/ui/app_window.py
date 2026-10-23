@@ -21,7 +21,7 @@ from services.recommendation_service import (
 
 # Window presets
 WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 1050
+WINDOW_HEIGHT = 800
 WINDOW_TITLE = "K-Pop Music Discovery"
 
 # Creating the main application window class
@@ -30,6 +30,7 @@ class AppWindow(tk.Tk):
         
         # TEMP: This is calling the base class constructor to initialize the Tkinter window.  Similar to C++
         super().__init__()
+        self.configure(background="#F0F0F0")
 
 
         self.db_repo = db_repo
@@ -43,6 +44,7 @@ class AppWindow(tk.Tk):
         self.search_in_progress = False
 
         # TEMP: This is essentially calling a function which is defined below.  This is a common pattern in Python to keep the constructor clean and organized.
+        self._configure_styles()
         self._create_widgets()
         self._layout_widgets()
 
@@ -51,14 +53,28 @@ class AppWindow(tk.Tk):
         self._display_preferences()
         print("Initial preference profile:", self.preference_profile)
 
+    def _configure_styles(self):
+        style = ttk.Style(self)
+        style.theme_use("clam")
+        style.configure("TFrame", background="#F0F0F0")
+        style.configure("TLabel", background="#F0F0F0", foreground="#111827")
+        style.configure("Action.TButton", font=("Segoe UI", 10, "bold"), foreground="white", background="#2563EB", bordercolor="#1D4ED8", lightcolor="#2563EB", darkcolor="#1D4ED8", borderwidth=2, relief="raised", padding=(12, 6))
+        style.map("Action.TButton", background=[("disabled", "#CBD5E1"), ("pressed", "#1E40AF"), ("active", "#1D4ED8")], foreground=[("disabled", "#64748B"), ("active", "white")], bordercolor=[("pressed", "#1E3A8A"), ("active", "#1E40AF")], relief=[("pressed", "sunken"), ("!pressed", "raised")])
+        style.configure("Discover.TButton", font=("Segoe UI", 11, "bold"), foreground="white", background="#7C3AED", bordercolor="#5B21B6", lightcolor="#7C3AED", darkcolor="#5B21B6", borderwidth=2, relief="raised", padding=(24, 10))
+        style.map("Discover.TButton", background=[("disabled", "#CBD5E1"), ("pressed", "#5B21B6"), ("active", "#6D28D9")], foreground=[("disabled", "#64748B"), ("active", "white")], bordercolor=[("pressed", "#4C1D95"), ("active", "#5B21B6")], relief=[("pressed", "sunken"), ("!pressed", "raised")])
+        style.configure("Clear.TButton", font=("Segoe UI", 9), foreground="#9F3030", background="#FCE8E8", padding=(10,5), borderwidth=1, relief="flat")
+        style.map("Clear.TButton", background=[("pressed", "#F5BABA"), ("active", "#F8D5D5")], foreground=[("disabled", "#999999")])
+
     # TEMP: This only creates the widgets but does not place them.
     def _create_widgets(self):
-        self.title_label = ttk.Label(self, text="K-Pop Music Discovery", font=("Helvetica", 24))
+        self.title_label = ttk.Label(self, text="K-Pop Music Discovery", font=("Helvetica", 22))
+        self.preference_header_frame = ttk.Frame(self)
+        self.discovery_header_frame = ttk.Frame(self)
         
-        self.search_label = ttk.Label(self, text="1. Search Music", font=("Segoe UI", 11, "bold"))
+        self.search_label = ttk.Label(self, text="1. Search Music:", font=("Segoe UI", 11, "bold"))
         self.search_frame = ttk.Frame(self)
         self.search_entry = ttk.Entry(self.search_frame, textvariable=self.search_var)
-        self.search_button = ttk.Button(self.search_frame, text="Search", command=self._on_search)
+        self.search_button = ttk.Button(self.search_frame, text="Search", command=self._on_search, style="Action.TButton")
         self.search_entry.bind("<Return>", lambda event: self._on_search())
         
         self.results_label = ttk.Label(self, text="Search Results:", font=("Segoe UI", 10))
@@ -67,29 +83,30 @@ class AppWindow(tk.Tk):
         self.results_scrollbar = ttk.Scrollbar(self.results_frame, orient="vertical", command=self.results_listbox.yview)
         self.results_listbox.configure(yscrollcommand=self.results_scrollbar.set)
         
-        self.discovery_label = ttk.Label(self, text="Discovery Recomnmendations:", font=("Segoe UI", 11, "bold"))
+        self.discovery_label = ttk.Label(self.discovery_header_frame, text="3. Discover Music:", font=("Segoe UI", 11, "bold"))
         self.discovery_frame = ttk.Frame(self)
         self.discovery_listbox = tk.Listbox(self.discovery_frame, height = 5)
         self.discovery_scrollbar = ttk.Scrollbar(self.discovery_frame, orient="vertical", command=self.discovery_listbox.yview)
         self.discovery_listbox.configure(yscrollcommand=self.discovery_scrollbar.set)
 
-        self.clear_history_button = ttk.Button(self, text="Clear Recommendation History", command=self._on_clear_history)
-        self.clear_preferences_button = ttk.Button(self, text="Clear Preference Profile", command=self._on_clear_preferences)
+        self.clear_history_button = ttk.Button(self.discovery_header_frame, text="Clear Recommendation History", command=self._on_clear_history, style="Clear.TButton")
+        self.clear_preferences_button = ttk.Button(self.preference_header_frame, text="Clear Preference Profile", command=self._on_clear_preferences, style="Clear.TButton")
 
-        self.discover_button = ttk.Button(self, text="Discover Music", command=self._on_discover)
+        self.discover_button = ttk.Button(self, text="Discover Music", command=self._on_discover, style="Discover.TButton")
 
     # TEMP: Adding preference widgets
+        self.preference_input_frame = ttk.Frame(self)
         self.preference_var = tk.StringVar()
         self.preference_type_var = tk.StringVar(value="artist")
-        self.preference_label = ttk.Label(self, text="2. Your Preferences", font=("Segoe UI", 11, "bold"))
-        self.preference_type_dropdown = ttk.Combobox(self, textvariable=self.preference_type_var, values=["artist", "tag"], state="readonly", width = 12)
-        self.preference_entry = ttk.Entry(self, textvariable=self.preference_var)
+        self.preference_label = ttk.Label(self.preference_header_frame, text="2. Your Preferences:", font=("Segoe UI", 11, "bold"))
+        self.preference_type_dropdown = ttk.Combobox(self.preference_input_frame, textvariable=self.preference_type_var, values=["Artist", "Tag"], state="readonly", width = 12)
+        self.preference_entry = ttk.Entry(self.preference_input_frame, textvariable=self.preference_var)
         self.preference_placeholder = "Enter artist or tag"
         self.preference_var.set(self.preference_placeholder)
         self.preference_entry.bind("<FocusIn>", self._on_preference_focus_in)
         self.preference_entry.bind("<FocusOut>", self._on_preference_focus_out)
 
-        self.add_preference_button = ttk.Button(self, text="Add Preference", command=self._on_add_preference)
+        self.add_preference_button = ttk.Button(self.preference_input_frame, text="Add Preference", command=self._on_add_preference, style="Action.TButton")
         self.preference_frame = ttk.Frame(self)
 
         self.preference_listbox = tk.Listbox(self.preference_frame, height=5)  
@@ -98,6 +115,7 @@ class AppWindow(tk.Tk):
 
         self.search_separator = ttk.Separator(self, orient="horizontal")
         self.preferences_separator = ttk.Separator(self, orient="horizontal")
+        self.title_separator = ttk.Separator(self, orient="horizontal")
 
     def _on_preference_focus_in(self, event):
         if self.preference_var.get() == self.preference_placeholder:
@@ -110,38 +128,50 @@ class AppWindow(tk.Tk):
 
     # TEMP: This places the widgets
     def _layout_widgets(self):
-        self.title_label.pack(pady=20)
+        # App title
+        self.title_label.pack(pady=(15,12))
+        self.title_separator.pack(fill="x", padx=100, pady=(0,15))
         
+        # Search Section
         self.search_label.pack(anchor="w", padx=20, pady=(10, 5))
         self.search_frame.pack(padx=20, pady=5, fill="x")
         self.search_entry.pack(side="left", fill="x", expand=True, padx=(0,10))
         self.search_button.pack(side="right")
-        
         self.results_label.pack(anchor="w", padx=20, pady=(10, 5))
-        self.results_frame.pack(padx=20, pady=10, fill="x")
-
+        self.results_frame.pack(padx=20, pady=(5,10), fill="x")
         self.results_listbox.pack(side="left", fill="both", expand=True)
         self.results_scrollbar.pack(side="right", fill="y")
 
-        self.search_separator.pack(padx=20, pady=(15,10), fill="x")
-        self.discover_button.pack(pady=10)
-        self.discovery_label.pack(anchor="w", padx=20, pady=(10, 5))
-        self.discovery_frame.pack(padx=20, pady=10, fill="x")
+        # Separator
+        self.search_separator.pack(padx=20, pady=(18,18), fill="x")
+
+        # Preferences section
+        self.preference_header_frame.pack(padx=20, pady=(5,5), fill="x")
+        self.preference_label.pack(side="left")
+        self.clear_preferences_button.pack(side="right")
+        
+        self.preference_frame.pack(padx=20, pady=(5, 5), fill="x")
+        self.preference_listbox.pack(side="left", fill="both", expand=True)
+        self.preference_scrollbar.pack(side="right", fill="y")
+
+        self.preference_input_frame.pack(padx=20, pady=(5, 5), fill="x")
+        self.preference_type_dropdown.pack(side="left", padx=(0,10))
+        self.preference_entry.pack(side="left", fill="x", expand=True, padx=(0,10))
+        self.add_preference_button.pack(side="right")
+
+        # Separator
+        self.preferences_separator.pack(padx=20, pady=(18,18), fill="x")
+
+        # Discovery section
+        self.discovery_header_frame.pack(padx=20, pady=(5,5), fill="x")
+        self.discovery_label.pack(side="left")
+        self.clear_history_button.pack(side="right")
+        self.discover_button.pack(pady=(5,10))
+
+        self.discovery_frame.pack(padx=20, pady=(5, 5), fill="x")
         self.discovery_listbox.pack(side="left", fill="both", expand=True)
         self.discovery_scrollbar.pack(side="right", fill="y")
 
-        # TEMP: Adding preference widgets to the layout
-        self.preferences_separator.pack(padx=20, pady=(15,10), fill="x")
-        self.clear_history_button.pack(anchor="e", padx=20, pady=10)
-        self.preference_label.pack(anchor="w", padx=20, pady=(10, 5))
-        self.preference_type_dropdown.pack(pady=5)
-        self.preference_entry.pack(padx = 20, pady=5, fill=tk.X)
-
-        self.add_preference_button.pack(pady=10)
-        self.preference_frame.pack(padx=20, pady=(10,30), fill="x")
-        self.preference_listbox.pack(side="left", fill="both", expand=True)
-        self.preference_scrollbar.pack(side="right", fill="y")
-        self.clear_preferences_button.pack(anchor="e", padx=20, pady=(5,20))
 
     # TEMP: This is the function that will be called when the search button is clicked.
     def _on_search(self):

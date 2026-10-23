@@ -380,7 +380,7 @@ class AppWindow(tk.Tk):
 
         popup = tk.Toplevel(self)
         popup.title("Song Tags")
-        popup.geometry("400x300")
+        popup.geometry("400x400")
         popup.resizable(False, False)
         popup.configure(background="#F0F0F0")
 

@@ -13,7 +13,8 @@ from services.recommendation_service import (
     parse_artist_search_results, 
     parse_track_search_results,
     get_selectable_song_tags,
-    score_recommendations
+    score_recommendations,
+    normalize_tag
 )
 
 def test_get_candidate_tracks():
@@ -316,4 +317,23 @@ def test_score_recommendations():
     assert ranked[1]["title"] == "Song A"
     assert ranked[1]["score"] == 1
     assert ranked[2]["title"] == "Song B"
+    assert ranked[2]["score"] == 0
+
+def test_normalize_tag():
+    assert normalize_tag("Hip-Hop") == "hiphop"
+    assert normalize_tag("HIP HOP") == "hiphop"
+    assert normalize_tag(" hiphop ") == "hiphop"
+    assert normalize_tag("K-Pop") == "kpop"
+
+def test_score_recommendations_normalizes_tag_variations():
+    recommendations = [
+        {"title": "Song A", "artist": "XG", "tags": ["hiphop"]},
+        {"title": "Song B", "artist": "XG", "tags": ["HIP HOP"]},
+        {"title": "Song C", "artist": "XG", "tags": ["dance"]}
+    ]
+
+    ranked = score_recommendations(recommendations, ["Hip-Hop"])
+
+    assert ranked[0]["score"] == 1
+    assert ranked[1]["score"] == 1
     assert ranked[2]["score"] == 0

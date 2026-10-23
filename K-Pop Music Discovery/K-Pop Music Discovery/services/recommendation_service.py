@@ -61,12 +61,15 @@ def filter_by_tag(recommendations, tag_name):
 
     return filtered
 
+def normalize_tag(tag):
+    return tag.strip().casefold().replace("-", "").replace(" ", "")
+
 def score_recommendations(recommendations, preferred_tags):
-    normalized_tags = {tag.strip().casefold() for tag in preferred_tags}
+    normalized_tags = {normalize_tag(tag) for tag in preferred_tags}
 
     for track in recommendations:
         track_tags = {
-            tag.strip().casefold()
+            normalize_tag(tag)
             for tag in track.get("tags", [])
             if isinstance(tag, str)
         }

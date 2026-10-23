@@ -101,24 +101,6 @@ def test_add_track_tags():
         {"title": "Drama", "artist": "aespa", "tags": []}
     ]
 
-def test_remove_unusable_tracks():
-    recommendations = [
-        {"title": "WOKE UP", "artist": "XG", "tags": ["rap"]},
-        {"title": "", "artist": "aespa"},
-        {"title": "Drama", "artist": ""},
-        {"title": "   ", "artist": "BTS"},
-        {"title": "MASCARA", "artist": "XG", "tags": []},
-        {"artist": "TWICE"},
-        {"title": "Supernova", "artist": None}
-    ]
-
-    result = remove_unusable_tracks(recommendations)
-
-    assert result == [
-        {"title": "WOKE UP", "artist": "XG", "tags": ["rap"]},
-        {"title": "MASCARA", "artist": "XG", "tags": []}
-    ]
-
 def test_combined_recommendation_filters():
     recommendations = [
         {"title": "WOKE UP", "artist": "XG", "tags": ["rap", "hip hop"]},
@@ -171,3 +153,26 @@ def test_remove_previously_recommended():
     assert len(result) == 1
     assert result[0]["title"] == "WOKE UP"
     assert result[0]["artist"] == "XG"
+
+def test_remove_unusable_tracks():
+    recommendations = [
+        {"title": "Howling", "artist": "XG"},
+        {"title": "", "artist": "aespa"},
+        {"title": "Drama", "artist": ""},
+        {"title": "   ", "artist": "XG"},
+        {"title": "Woke Up", "artist": "XG"},
+        {"title": None, "artist": "aespa"},
+        {"artist": "XG"},
+        {"title": "Song", "artist": 123}
+    ]
+
+    result = remove_unusable_tracks(recommendations)
+
+    assert result == [
+        {"title": "Howling", "artist": "XG"},
+        {"title": "Woke Up", "artist": "XG"}
+    ]
+
+
+def test_remove_unusable_tracks_empty_list():
+    assert remove_unusable_tracks([]) == []

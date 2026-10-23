@@ -130,7 +130,6 @@ class AppWindow(tk.Tk):
             return
 
         search_term = self.search_var.get().strip()
-
         if not search_term:
             return
 
@@ -139,7 +138,6 @@ class AppWindow(tk.Tk):
 
         # TEMP: Grab the term from the box and strip whitespace
         search_term = self.search_var.get().strip()
-
         if not search_term:
             return  # TEMP: Do nothing if the search term is empty
 

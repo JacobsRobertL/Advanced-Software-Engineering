@@ -6,6 +6,8 @@ from tkinter import ttk, messagebox
 from api.lastfm_client import (
     get_top_tracks,
     get_song_tags,
+    search_artists,
+    search_tracks
     )
 
 from services.recommendation_service import (
@@ -17,6 +19,8 @@ from services.recommendation_service import (
     filter_by_artist,
     add_track_tags,
     filter_by_tag,
+    parse_artist_search_results,
+    parse_track_search_results
     )
 
 # Window presets
@@ -186,64 +190,28 @@ class AppWindow(tk.Tk):
         self.search_in_progress = True
         self.search_button.configure(state="disabled")
 
-        # TEMP: Grab the term from the box and strip whitespace
-        search_term = self.search_var.get().strip()
-        if not search_term:
-            return  # TEMP: Do nothing if the search term is empty
+        # TEMP: Need to rework the search as we are now searching for similar artists and tracks as opposed to filtering on returned results that match the initial search
+        artist_response = search_artists(search_term)
+        track_response = search_tracks(search_term)
 
-        # Generate recommendations using Last.fm
-        recommendations = generate_recommendations([search_term], get_top_tracks)
-        print("After generating recommendations:", len(recommendations))
+        artists = parse_artist_search_results(artist_response)
+        tracks = parse_track_search_results(track_response)
 
-        # TEMPTEST: comment below to show filtering
-        recommendations = remove_unusable_tracks(recommendations)
+        self.search_results = artists + tracks
 
-        recommendations = filter_by_artist(recommendations, [search_term])
-        # TEMP: print("After artist filtering:", len(recommendations))
-
-        recommendations = remove_duplicate_recommendations(recommendations)
-        #TEMP: print("After duplicate removal:", len(recommendations))
-
-        history = self.db_repo.get_recommendation_history()
-        #TEMP: print("History count:", len(history))
-
-        recommendations = remove_previously_recommended(recommendations, history)
-        #TEMP: print("After history filtering:", len(recommendations))
-
-        recommendations = add_track_tags(recommendations, get_song_tags)
-
-        preferred_tags = self.preference_profile["tags"]
-
-        if preferred_tags:
-            recommendations = filter_by_tag(recommendations, preferred_tags)
-
-        print("After tag filtering:", len(recommendations))
-
-        # TEMP: Temporarily print the recommendations to the console for debugging
-        for track in recommendations:
-            print(f"Recommended: {track['artist']} - {track['title']}")
-            print(f"Tags: {track['tags']}")
-
-        # Save the recommendations to SQLite
-        save_generated_recommendations(
-                recommendations,
-                self.db_repo.save_recommendation
-            )
-
-        # Display recommendations in Tkinter
         results = []
-
-        for track in recommendations:
-            results.append(f"{track['artist']} - {track['title']}")
+        for item in self.search_results:
+            if item["type"] == "artist":
+                results.append(f"Artist: {item['artist']}")
+            else:
+                results.append(f"Song: {item['title']} - {item['artist']}")
 
         if not results:
-            results.append("No new recommendations available.")
+            results = ["No matching artist or songs found."]
 
         self._display_results(results)
+        self._finish_search()
 
-        print(f"New recommendations saved: {len(recommendations)}")
-
-        self.after(300, self._finish_search)
 
     def _finish_search(self):
         self.search_in_progress = False

@@ -1,4 +1,18 @@
-from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag, add_track_tags, remove_unusable_tracks, remove_duplicate_recommendations, remove_previously_recommended, parse_similar_artists, generate_discovery_recommendations, parse_artist_search_results, parse_track_search_results
+from services.recommendation_service import (
+    get_candidate_tracks, 
+    generate_recommendations, 
+    filter_by_artist, 
+    parse_tag_data, 
+    filter_by_tag, 
+    add_track_tags, 
+    remove_unusable_tracks, 
+    remove_duplicate_recommendations, 
+    remove_previously_recommended, 
+    parse_similar_artists, 
+    generate_discovery_recommendations, 
+    parse_artist_search_results, 
+    parse_track_search_results
+)
 
 def test_get_candidate_tracks():
     # Mock the fetch_tracks function to return a predefined response

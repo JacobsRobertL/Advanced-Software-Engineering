@@ -20,7 +20,7 @@ from services.recommendation_service import (
 
 # Window presets
 WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 650
+WINDOW_HEIGHT = 750
 WINDOW_TITLE = "K-Pop Music Discovery"
 
 # Creating the main application window class
@@ -47,6 +47,7 @@ class AppWindow(tk.Tk):
 
         # TEMP: Test loading profile from the database
         self.preference_profile = self._load_preference_profile()
+        self._display_preferences()
         print("Initial preference profile:", self.preference_profile)
 
     # TEMP: This only creates the widgets but does not place them.
@@ -97,7 +98,11 @@ class AppWindow(tk.Tk):
         self.preference_entry.bind("<FocusOut>", self._on_preference_focus_out)
 
         self.add_preference_button = ttk.Button(self, text="Add Preference", command=self._on_add_preference)
-        self.preference_listbox = tk.Listbox(self, height=5)
+        self.preference_frame = ttk.Frame(self)
+
+        self.preference_listbox = tk.Listbox(self.preference_frame, height=8)  
+        self.preference_scrollbar = ttk.Scrollbar(self.preference_frame, orient="vertical", command=self.preference_listbox.yview)
+        self.preference_listbox.configure(yscrollcommand=self.preference_scrollbar.set)
 
     def _on_preference_focus_in(self, event):
         if self.preference_var.get() == self.preference_placeholder:
@@ -115,7 +120,7 @@ class AppWindow(tk.Tk):
         self.search_label.pack(pady=10)
         self.search_frame.pack(padx=20, pady=5, fill="x")
         self.search_entry.pack(side="left", fill="x", expand=True, padx=(0,10))
-        self.search_button.pack(pady=10)
+        self.search_button.pack(side="right")
         
         self.results_label.pack(pady=10)
         self.results_frame.pack(padx=20, pady=10, fill="x")
@@ -138,9 +143,9 @@ class AppWindow(tk.Tk):
         self.preference_entry.pack(padx = 20, pady=5, fill=tk.X)
 
         self.add_preference_button.pack(pady=10)
-        self.preference_listbox.pack(padx=20, pady=10, fill="x")
-
-        self.clear_history_button.pack(pady=10)
+        self.preference_frame.pack(padx=20, pady=(10,30), fill="x")
+        self.preference_listbox.pack(side="left", fill="both", expand=True)
+        self.preference_scrollbar.pack(side="right", fill="y")
 
     # TEMP: This is the function that will be called when the search button is clicked.
     def _on_search(self):
@@ -243,6 +248,16 @@ class AppWindow(tk.Tk):
         self.preference_var.set(self.preference_placeholder)  # Clear the entry after adding preference
 
         self.preference_profile = self._load_preference_profile()  # Reload the preference profile
+
+        self._display_preferences()
+
+        print("Updated preference profile:", self.preference_profile)
+
+    def _display_preferences(self):
+        self.preference_listbox.delete(0, tk.END)
+
+        for preference_type, preference_value in self.db_repo.get_preferences():
+            self.preference_listbox.insert(tk.END, f"{preference_type.title()}: {preference_value}")
 
 
     def _load_preference_profile(self):

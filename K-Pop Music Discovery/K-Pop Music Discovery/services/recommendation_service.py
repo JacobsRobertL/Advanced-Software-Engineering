@@ -140,6 +140,15 @@ def parse_artist_search_results(response):
         if isinstance(artist, dict) and isinstance(artist.get("name"), str) and artist["name"].strip()
     ]
 
+def parse_track_search_results(response):
+    tracks = response.get("results", {}).get("trackmatches", {}).get("track", [])
+
+    return [
+        {"type": "track", "artist": track["artist"], "title": track["name"]}
+        for track in tracks
+        if isinstance(track, dict) and isinstance(track.get("artist"), str) and track["artist"].strip() and isinstance(track.get("name"), str) and track["name"].strip()
+    ]
+
 def generate_discovery_recommendations(preferred_artists, fetch_similar, fetch_tracks):
     artists_to_search = list(preferred_artists)
     

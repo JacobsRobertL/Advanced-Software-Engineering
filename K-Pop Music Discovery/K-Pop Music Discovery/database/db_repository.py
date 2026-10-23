@@ -50,6 +50,23 @@ class DatabaseRepository:
             );
         """)
 
+        # TEMP: This is a cleanup method that will run every time.  While it is not needed repeatedly this wont cause any significant perfomance issue
+        connection.execute("""
+            DELETE FROM preferences
+            WHERE preference_id NOT IN (
+                SELECT MIN(preference_id)
+                FROM preferences
+                GROUP BY preference_type COLLATE NOCASE, preference_value COLLATE NOCASE
+            )
+        """)
+
+        connection.execute("""
+            CREATE UNIQUE INDEX IF NOT EXISTS idx_preferences_unique_nocase
+            ON preferences (preference_type COLLATE NOCASE, preference_value COLLATE NOCASE)
+        """)
+
+
+
         connection.execute("""
             CREATE TABLE IF NOT EXISTS recommendations (
                 recommendation_id INTEGER PRIMARY KEY,
@@ -59,6 +76,7 @@ class DatabaseRepository:
             );
         """)
         
+        connection.commit()
         connection.close()
         
     def add_preference(self, preference_type, preference_value):

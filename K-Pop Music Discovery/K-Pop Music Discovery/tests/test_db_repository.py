@@ -95,6 +95,30 @@ def test_duplicate_preferences_not_saved(tmp_path):
 
     assert db.get_preferences() == [("artist", "aespa")]
 
+def test_case_insensitive_duplicate_preferences_not_saved(tmp_path):
+    db = DatabaseRepository()
+    db.database_name = tmp_path / "test_kpop.db"
+    db.initialize_database()
+
+    # Add artist preferences with different capitalization
+    db.add_preference("artist", "aespa")
+    db.add_preference("artist", "AESPA")
+    db.add_preference("artist", "Aespa")
+
+    # Add tag preferences with different capitalization
+    db.add_preference("tag", "k-pop")
+    db.add_preference("tag", "K-POP")
+
+    # Verify that the same value can exist under a different preference type
+    db.add_preference("artist", "k-pop")
+
+    preferences = db.get_preferences()
+
+    assert ("artist", "aespa") in preferences
+    assert ("artist", "k-pop") in preferences
+    assert ("tag", "k-pop") in preferences
+    assert len(preferences) == 3
+
 
 def test_clear_preferences(tmp_path):
     db = DatabaseRepository()

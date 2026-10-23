@@ -380,19 +380,53 @@ class AppWindow(tk.Tk):
 
         popup = tk.Toplevel(self)
         popup.title("Song Tags")
-        popup.geometry("400x400")
+        popup.geometry("420x350")
         popup.resizable(False, False)
-        popup.configure(background="#F0F0F0")
+        popup.configure(background="#F7F8FC")
 
-        ttk.Label(popup, text=f"{track['title']} — {track['artist']}", font=("Segoe UI", 12, "bold")).pack(pady=(20, 10))
+        style = ttk.Style(popup)
+        style.configure("Tag.TCheckbutton", background="#F7F8FC", foreground="#27334D", font=("Segoe UI", 10), padding=(6, 4))
+        style.map("Tag.TCheckbutton", background=[("active", "#F7F8FC"), ("selected", "#F7F8FC")])
+        style.configure("Tags.TFrame", background="#F7F8FC")
+
+        ttk.Label(popup, text=track["title"], font=("Segoe UI", 15, "bold"), background="#F7F8FC", foreground="#20263B").pack(pady=(20, 2))
+        ttk.Label(popup, text=track["artist"], font=("Segoe UI", 10), background="#F7F8FC", foreground="#65718A").pack(pady=(0, 12))
         
         response = get_song_tags(track["artist"], track["title"])
         tags = get_selectable_song_tags(response)
 
+        tag_selections = []
+
         if tags:
-            for tag in tags:
-                ttk.Label(popup, text=tag).pack(anchor="w", padx=30, pady=2)
+            tags_frame = ttk.Frame(popup, style="Tags.TFrame")
+            tags_frame.pack(pady=(5, 10))
+
+            for index, tag in enumerate(tags):
+                selected = tk.BooleanVar(master=popup, value=False)
+
+                checkbox = ttk.Checkbutton(tags_frame, text=tag, variable=selected, style="Tag.TCheckbutton")
+                checkbox.grid(row=index // 2, column=index % 2, sticky="w", padx=15, pady=3)
+
+                tag_selections.append((tag, selected))
         else:
             ttk.Label(popup, text="No tags available for this song").pack(pady=10)
 
-        ttk.Button(popup, text="Close", command=popup.destroy, style="Action.TButton").pack(pady=15)
+        def save_selected_tags():
+            selected_tags = [tag for tag, selected in tag_selections if selected.get()]
+
+            if not selected_tags:
+                messagebox.showinfo("No Tags Selected", "Please select at least one tag.", parent=popup)
+                return
+
+            for tag in selected_tags:
+                self.db_repo.add_preference("tag", tag)
+
+            self.preference_profile = self._load_preference_profile()
+            self._display_preferences()
+            popup.destroy()
+
+        buttons_frame = ttk.Frame(popup, style="Tags.TFrame")
+        buttons_frame.pack(pady=(15, 10))
+
+        ttk.Button(buttons_frame, text="Cancel", command=popup.destroy).pack(side="left", padx=5)
+        ttk.Button(buttons_frame, text="Add Selected Tags", style="Action.TButton", command=save_selected_tags).pack(side="left", padx=5)

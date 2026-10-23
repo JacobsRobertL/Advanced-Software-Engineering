@@ -13,6 +13,7 @@ from services.recommendation_service import (
     save_generated_recommendations,
     remove_duplicate_recommendations,
     remove_previously_recommended,
+    remove_unusable_tracks,
     filter_by_artist,
     add_track_tags,
     filter_by_tag,
@@ -20,7 +21,7 @@ from services.recommendation_service import (
 
 # Window presets
 WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 750
+WINDOW_HEIGHT = 1050
 WINDOW_TITLE = "K-Pop Music Discovery"
 
 # Creating the main application window class
@@ -54,25 +55,33 @@ class AppWindow(tk.Tk):
     def _create_widgets(self):
         self.title_label = ttk.Label(self, text="K-Pop Music Discovery", font=("Helvetica", 24))
         
-        self.search_label = ttk.Label(self, text="Let's start with songs you like:")
+        self.search_label = ttk.Label(self, text="1. Search Music", font=("Segoe UI", 11, "bold"))
         self.search_frame = ttk.Frame(self)
         self.search_entry = ttk.Entry(self.search_frame, textvariable=self.search_var)
         self.search_button = ttk.Button(self.search_frame, text="Search", command=self._on_search)
         self.search_entry.bind("<Return>", lambda event: self._on_search())
         
-        self.results_label = ttk.Label(self, text="Results:")
+        self.results_label = ttk.Label(self, text="Search Results:", font=("Segoe UI", 10))
         self.results_frame = ttk.Frame(self)
-        self.results_listbox = tk.Listbox(self.results_frame, height=8)
+        self.results_listbox = tk.Listbox(self.results_frame, height=5)
         self.results_scrollbar = ttk.Scrollbar(self.results_frame, orient="vertical", command=self.results_listbox.yview)
         self.results_listbox.configure(yscrollcommand=self.results_scrollbar.set)
         
+        self.discovery_label = ttk.Label(self, text="Discovery Recomnmendations:", font=("Segoe UI", 11, "bold"))
+        self.discovery_frame = ttk.Frame(self)
+        self.discovery_listbox = tk.Listbox(self.discovery_frame, height = 5)
+        self.discovery_scrollbar = ttk.Scrollbar(self.discovery_frame, orient="vertical", command=self.discovery_listbox.yview)
+        self.discovery_listbox.configure(yscrollcommand=self.discovery_scrollbar.set)
+
         self.clear_history_button = ttk.Button(self, text="Clear Recommendation History", command=self._on_clear_history)
         self.clear_preferences_button = ttk.Button(self, text="Clear Preference Profile", command=self._on_clear_preferences)
+
+        self.discover_button = ttk.Button(self, text="Discover Music", command=self._on_discover)
 
     # TEMP: Adding preference widgets
         self.preference_var = tk.StringVar()
         self.preference_type_var = tk.StringVar(value="artist")
-        self.preference_label = ttk.Label(self, text="Add a favorite artist or tag:")
+        self.preference_label = ttk.Label(self, text="2. Your Preferences", font=("Segoe UI", 11, "bold"))
         self.preference_type_dropdown = ttk.Combobox(self, textvariable=self.preference_type_var, values=["artist", "tag"], state="readonly", width = 12)
         self.preference_entry = ttk.Entry(self, textvariable=self.preference_var)
         self.preference_placeholder = "Enter artist or tag"
@@ -83,9 +92,12 @@ class AppWindow(tk.Tk):
         self.add_preference_button = ttk.Button(self, text="Add Preference", command=self._on_add_preference)
         self.preference_frame = ttk.Frame(self)
 
-        self.preference_listbox = tk.Listbox(self.preference_frame, height=8)  
+        self.preference_listbox = tk.Listbox(self.preference_frame, height=5)  
         self.preference_scrollbar = ttk.Scrollbar(self.preference_frame, orient="vertical", command=self.preference_listbox.yview)
         self.preference_listbox.configure(yscrollcommand=self.preference_scrollbar.set)
+
+        self.search_separator = ttk.Separator(self, orient="horizontal")
+        self.preferences_separator = ttk.Separator(self, orient="horizontal")
 
     def _on_preference_focus_in(self, event):
         if self.preference_var.get() == self.preference_placeholder:
@@ -100,20 +112,28 @@ class AppWindow(tk.Tk):
     def _layout_widgets(self):
         self.title_label.pack(pady=20)
         
-        self.search_label.pack(pady=10)
+        self.search_label.pack(anchor="w", padx=20, pady=(10, 5))
         self.search_frame.pack(padx=20, pady=5, fill="x")
         self.search_entry.pack(side="left", fill="x", expand=True, padx=(0,10))
         self.search_button.pack(side="right")
         
-        self.results_label.pack(pady=10)
+        self.results_label.pack(anchor="w", padx=20, pady=(10, 5))
         self.results_frame.pack(padx=20, pady=10, fill="x")
 
         self.results_listbox.pack(side="left", fill="both", expand=True)
         self.results_scrollbar.pack(side="right", fill="y")
 
+        self.search_separator.pack(padx=20, pady=(15,10), fill="x")
+        self.discover_button.pack(pady=10)
+        self.discovery_label.pack(anchor="w", padx=20, pady=(10, 5))
+        self.discovery_frame.pack(padx=20, pady=10, fill="x")
+        self.discovery_listbox.pack(side="left", fill="both", expand=True)
+        self.discovery_scrollbar.pack(side="right", fill="y")
+
         # TEMP: Adding preference widgets to the layout
-        self.clear_history_button.pack(pady=10)
-        self.preference_label.pack(pady=(10, 0))
+        self.preferences_separator.pack(padx=20, pady=(15,10), fill="x")
+        self.clear_history_button.pack(anchor="e", padx=20, pady=10)
+        self.preference_label.pack(anchor="w", padx=20, pady=(10, 5))
         self.preference_type_dropdown.pack(pady=5)
         self.preference_entry.pack(padx = 20, pady=5, fill=tk.X)
 
@@ -121,7 +141,7 @@ class AppWindow(tk.Tk):
         self.preference_frame.pack(padx=20, pady=(10,30), fill="x")
         self.preference_listbox.pack(side="left", fill="both", expand=True)
         self.preference_scrollbar.pack(side="right", fill="y")
-        self.clear_preferences_button.pack(pady=(5,20))
+        self.clear_preferences_button.pack(anchor="e", padx=20, pady=(5,20))
 
     # TEMP: This is the function that will be called when the search button is clicked.
     def _on_search(self):
@@ -142,11 +162,11 @@ class AppWindow(tk.Tk):
             return  # TEMP: Do nothing if the search term is empty
 
         # Generate recommendations using Last.fm
-        recommendations = generate_recommendations(
-                [search_term],
-                get_top_tracks
-            )
+        recommendations = generate_recommendations([search_term], get_top_tracks)
         print("After generating recommendations:", len(recommendations))
+
+        # TEMPTEST: comment below to show filtering
+        recommendations = remove_unusable_tracks(recommendations)
 
         recommendations = filter_by_artist(recommendations, [search_term])
         # TEMP: print("After artist filtering:", len(recommendations))
@@ -207,6 +227,13 @@ class AppWindow(tk.Tk):
         for result in results:
             self.results_listbox.insert(tk.END, result)
 
+    def _display_discoveries(self, recommendations):
+        self.discovery_listbox.delete(0, tk.END)
+
+        for recommendation in recommendations:
+            self.discovery_listbox.inster(tk.END, recommendation)
+
+
     # TEMP callback for adding preferences
     def _on_add_preference(self):
         preference = self.preference_var.get().strip()
@@ -262,3 +289,20 @@ class AppWindow(tk.Tk):
             self.preference_profile = self._load_preference_profile()
             self._display_preferences()
             messagebox.showinfo("Preferences Cleared", "Preference profile has been cleared.")
+
+    def _on_discover(self):
+        self.preference_profile = self._load_preference_profile()
+
+        preferred_artists = self.preference_profile["artists"]
+        preferred_tags = self.preference_profile["tags"]
+
+        if not preferred_artists:
+            messagebox.showinfo(
+                "No Artist Preferences",
+                "Please add at least one artist preference before discovering music."
+            )
+            return
+
+        print("Discover button clicked")
+        print("Preferred artists:", preferred_artists)
+        print("Preferred tags:", preferred_tags)

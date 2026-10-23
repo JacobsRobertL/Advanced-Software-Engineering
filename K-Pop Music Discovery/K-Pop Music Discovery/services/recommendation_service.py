@@ -122,6 +122,39 @@ def remove_previously_recommended(recommendations, history):
 
     return filtered
 
+def parse_similar_artists(response):
+    artists = response.get("similarartists", {}).get("artist", [])
+
+    return [
+        artist["name"]
+        for artist in artists
+        if isinstance(artist.get("name"), str) and artist["name"].strip()
+    ]
+
+
+def generate_discovery_recommendations(preferred_artists, fetch_similar, fetch_tracks):
+    artists_to_search = list(preferred_artists)
+    
+    for artist_name in preferred_artists:
+        response = fetch_similar(artist_name)
+        similar_artists = parse_similar_artists(response)
+
+        # Limit discovery to 2 similar artists per preference
+        artists_to_search.extend(similar_artists[:2])
+
+    # Remove duplicate artists
+    unique_artists = []
+    seen = set()
+
+    for artist_name in artists_to_search:
+        normalized = artist_name.strip().casefold()
+
+        if normalized and normalized not in seen:
+            seen.add(normalized)
+            unique_artists.append(artist_name)
+
+    return generate_recommendations(unique_artists, fetch_tracks)
+
 if __name__ == "__main__":  #For testing purposes outside of a unit test framework
     # TEMP
     # artists = ["XG", "NewJeans", "Mamamoo"]

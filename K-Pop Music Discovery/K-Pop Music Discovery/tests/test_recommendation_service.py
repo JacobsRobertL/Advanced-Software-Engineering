@@ -1,4 +1,4 @@
-from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag, add_track_tags, remove_unusable_tracks, remove_duplicate_recommendations, remove_previously_recommended
+from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag, add_track_tags, remove_unusable_tracks, remove_duplicate_recommendations, remove_previously_recommended, parse_similar_artists, generate_discovery_recommendations
 
 def test_get_candidate_tracks():
     # Mock the fetch_tracks function to return a predefined response
@@ -176,3 +176,55 @@ def test_remove_unusable_tracks():
 
 def test_remove_unusable_tracks_empty_list():
     assert remove_unusable_tracks([]) == []
+
+def test_parse_similar_artists():
+    response = {
+        "similarartists": {
+            "artist": [
+                {"name": "Artist A", "match": "0.95"},
+                {"name": "Artist B", "match": "0.82"},
+                {"name": ""},
+                {}
+            ]
+        }
+    }
+
+    result = parse_similar_artists(response)
+
+    assert result == ["Artist A", "Artist B"]
+
+def test_generate_discovery_recommendations():
+
+    def mock_similar(artist_name):
+        return {
+            "similarartists": {
+                "artist": [
+                    {"name": "Similar Artist"},
+                    {"name": "XG"}
+                ]
+            }
+        }
+
+    def mock_tracks(artist_name):
+        return {
+            "toptracks": {
+                "track": [
+                    {
+                        "name": f"{artist_name} Song",
+                        "artist": {"name": artist_name}
+                    }
+                ]
+            }
+        }
+
+    result = generate_discovery_recommendations(
+        ["aespa", "XG"],
+        mock_similar,
+        mock_tracks
+    )
+
+    assert result == [
+        {"title": "aespa Song", "artist": "aespa"},
+        {"title": "XG Song", "artist": "XG"},
+        {"title": "Similar Artist Song", "artist": "Similar Artist"}
+    ]

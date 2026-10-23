@@ -63,6 +63,25 @@ def get_song_tags(artist_name, track_name):
     response.raise_for_status()
     return response.json()
 
+def get_similar_artists(artist_name):
+    parameters = {
+        "method": "artist.getsimilar",
+        "artist": artist_name,
+        "api_key": API_KEY,
+        "format": "json",
+        "limit": 10,
+        "autocorrect": 1
+    }
+
+    response = requests.get(
+        BASE_URL,
+        params=parameters,
+        timeout=10
+    )
+
+    response.raise_for_status()
+    return response.json()
+
 #if __name__ == "__main__":
 #    artist_name = "BTS"
 #    artist_info = get_artist_info(artist_name)

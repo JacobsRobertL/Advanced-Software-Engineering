@@ -39,6 +39,7 @@ class AppWindow(tk.Tk):
         self.resizable(False, False)
 
         self.search_var = tk.StringVar()
+        self.search_in_progress = False
 
         # TEMP: This is essentially calling a function which is defined below.  This is a common pattern in Python to keep the constructor clean and organized.
         self._create_widgets()
@@ -53,8 +54,10 @@ class AppWindow(tk.Tk):
         self.title_label = ttk.Label(self, text="K-Pop Music Discovery", font=("Helvetica", 24))
         
         self.search_label = ttk.Label(self, text="Let's start with songs you like:")
-        self.search_entry = ttk.Entry(self, textvariable=self.search_var)
-        self.search_button = ttk.Button(self, text="Search", command=self._on_search)
+        self.search_frame = ttk.Frame(self)
+        self.search_entry = ttk.Entry(self.search_frame, textvariable=self.search_var)
+        self.search_button = ttk.Button(self.search_frame, text="Search", command=self._on_search)
+        self.search_entry.bind("<Return>", lambda event: self._on_search())
         
         self.results_label = ttk.Label(self, text="Results:")
         self.results_frame = ttk.Frame(self)
@@ -110,7 +113,8 @@ class AppWindow(tk.Tk):
         self.title_label.pack(pady=20)
         
         self.search_label.pack(pady=10)
-        self.search_entry.pack(pady=5)
+        self.search_frame.pack(padx=20, pady=5, fill="x")
+        self.search_entry.pack(side="left", fill="x", expand=True, padx=(0,10))
         self.search_button.pack(pady=10)
         
         self.results_label.pack(pady=10)
@@ -140,6 +144,18 @@ class AppWindow(tk.Tk):
 
     # TEMP: This is the function that will be called when the search button is clicked.
     def _on_search(self):
+
+        if self.search_in_progress:
+            return
+
+        search_term = self.search_var.get().strip()
+
+        if not search_term:
+            return
+
+        self.search_in_progress = True
+        self.search_button.configure(state="disabled")
+
         # TEMP: Grab the term from the box and strip whitespace
         search_term = self.search_var.get().strip()
 
@@ -197,6 +213,13 @@ class AppWindow(tk.Tk):
         self._display_results(results)
 
         print(f"New recommendations saved: {len(recommendations)}")
+
+        self.after(300, self._finish_search)
+
+    def _finish_search(self):
+        self.search_in_progress = False
+        self.search_button.configure(state="normal")
+        self.search_entry.configure(state="normal")
 
     # TEMP: This displays the results in the listbox.  As we have not contacted the API yet this is a placeholder
     def _display_results(self, results):

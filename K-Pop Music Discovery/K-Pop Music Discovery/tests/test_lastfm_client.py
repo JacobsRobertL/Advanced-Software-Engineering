@@ -1,5 +1,5 @@
 from unittest.mock import patch, Mock
-from api.lastfm_client import get_similar_artists
+from api.lastfm_client import get_similar_artists, search_artists
 
 
 def test_get_similar_artists():
@@ -26,6 +26,36 @@ def test_get_similar_artists():
         args, kwargs = mock_get.call_args
 
         assert kwargs["params"]["method"] == "artist.getsimilar"
+        assert kwargs["params"]["artist"] == "aespa"
+
+        mock_response.raise_for_status.assert_called_once()
+
+def test_search_artists():
+    mock_response = Mock()
+    mock_response.json.return_value = {
+        "results": {
+            "artistmatches": {
+                "artist": [
+                    {"name": "aespa"},
+                    {"name": "aespa Official"}
+                ]
+            }
+        }
+    }
+
+    with patch("api.lastfm_client.requests.get") as mock_get:
+        mock_get.return_value = mock_response
+
+        result = search_artists("aespa")
+
+        assert len(result["results"]["artistmatches"]["artist"]) == 2
+        assert result["results"]["artistmatches"]["artist"][0]["name"] == "aespa"
+
+        mock_get.assert_called_once()
+
+        args, kwargs = mock_get.call_args
+
+        assert kwargs["params"]["method"] == "artist.search"
         assert kwargs["params"]["artist"] == "aespa"
 
         mock_response.raise_for_status.assert_called_once()

@@ -82,6 +82,23 @@ def get_similar_artists(artist_name):
     response.raise_for_status()
     return response.json()
 
+def search_artists(search_term):
+    parameters = {
+        "method": "artist.search",
+        "artist": search_term,
+        "api_key": API_KEY,
+        "format": "json",
+        "limit": 10
+    }
+
+    response = requests.get(
+        BASE_URL,
+        params=parameters,
+        timeout=10
+    )
+    response.raise_for_status()
+    return response.json()
+
 #if __name__ == "__main__":
 #    artist_name = "BTS"
 #    artist_info = get_artist_info(artist_name)

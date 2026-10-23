@@ -7,7 +7,8 @@ from api.lastfm_client import (
     get_top_tracks,
     get_song_tags,
     search_artists,
-    search_tracks
+    search_tracks,
+    get_similar_artists
     )
 
 from services.recommendation_service import (
@@ -21,7 +22,8 @@ from services.recommendation_service import (
     filter_by_tag,
     parse_artist_search_results,
     parse_track_search_results,
-    get_selectable_song_tags
+    get_selectable_song_tags,
+    generate_discovery_recommendations
     )
 
 # Window presets
@@ -300,12 +302,16 @@ class AppWindow(tk.Tk):
 
 
     def _load_preference_profile(self):
+        print("Raw database preferences:", self.db_repo.get_preferences())
         preferences = self.db_repo.get_preferences()
         self.preference_listbox.delete(0, tk.END)  # Clear previous preferences
 
         profile = {"artists": [], "tags": []}
         
         for preference_type, preference_value in preferences:
+            preference_type = preference_type.strip().lower()
+            self.preference_listbox.insert(tk.END, f"{preference_type.title()}: {preference_value}")
+
             if preference_type == "artist":  # TEMP: Assuming we only care about artist preferences for now
                 profile["artists"].append(preference_value)
             elif preference_type == "tag":  # TEMP: Assuming we only care about tag preferences for now
@@ -330,6 +336,8 @@ class AppWindow(tk.Tk):
 
     def _on_discover(self):
         self.preference_profile = self._load_preference_profile()
+        print("DATABASE PREFERENCES:", self.db_repo.get_preferences())
+        print("LOADED PROFILE:", self.preference_profile)
 
         preferred_artists = self.preference_profile["artists"]
         preferred_tags = self.preference_profile["tags"]
@@ -341,9 +349,21 @@ class AppWindow(tk.Tk):
             )
             return
 
-        print("Discover button clicked")
-        print("Preferred artists:", preferred_artists)
-        print("Preferred tags:", preferred_tags)
+        recommendations = generate_discovery_recommendations(preferred_artists, get_similar_artists, get_top_tracks)
+        recommendations = remove_unusable_tracks(recommendations)
+        recommendations = remove_duplicate_recommendations(recommendations)
+
+        history = self.db_repo.get_recommendation_history()
+        recommendations = remove_previously_recommended(recommendations, history)
+        save_generated_recommendations(recommendations, self.db_repo.save_recommendation)
+
+        display_results = []
+
+        for track in recommendations:
+            display_results.append(f"{track['title']} — {track['artist']}")
+
+        self._display_discoveries(display_results)
+        print("PREFERENCES LISTBOX AFTER DISCOVER:", self.preference_listbox.get(0, tk.END))
 
     def _on_add_selected_preference(self):
         artist_selection = self.artist_results_listbox.curselection()

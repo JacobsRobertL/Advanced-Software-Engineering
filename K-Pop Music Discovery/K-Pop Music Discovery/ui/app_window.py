@@ -62,35 +62,18 @@ class AppWindow(tk.Tk):
         
         self.results_label = ttk.Label(self, text="Results:")
         self.results_frame = ttk.Frame(self)
-
-        self.results_listbox = tk.Listbox(
-            self.results_frame,
-            height=8
-        )
-
-        self.results_scrollbar = ttk.Scrollbar(
-            self.results_frame,
-            orient="vertical",
-            command=self.results_listbox.yview
-        )
-
-        self.results_listbox.configure(
-            yscrollcommand=self.results_scrollbar.set
-        )
-
+        self.results_listbox = tk.Listbox(self.results_frame, height=8)
+        self.results_scrollbar = ttk.Scrollbar(self.results_frame, orient="vertical", command=self.results_listbox.yview)
+        self.results_listbox.configure(yscrollcommand=self.results_scrollbar.set)
+        
         self.clear_history_button = ttk.Button(self, text="Clear Recommendation History", command=self._on_clear_history)
+        self.clear_preferences_button = ttk.Button(self, text="Clear Preference Profile", command=self._on_clear_preferences)
 
     # TEMP: Adding preference widgets
         self.preference_var = tk.StringVar()
         self.preference_type_var = tk.StringVar(value="artist")
         self.preference_label = ttk.Label(self, text="Add a favorite artist or tag:")
-        self.preference_type_dropdown = ttk.Combobox(
-            self,
-            textvariable=self.preference_type_var,
-            values=["artist", "tag"],
-            state="readonly",
-            width = 12
-        )
+        self.preference_type_dropdown = ttk.Combobox(self, textvariable=self.preference_type_var, values=["artist", "tag"], state="readonly", width = 12)
         self.preference_entry = ttk.Entry(self, textvariable=self.preference_var)
         self.preference_placeholder = "Enter artist or tag"
         self.preference_var.set(self.preference_placeholder)
@@ -125,16 +108,8 @@ class AppWindow(tk.Tk):
         self.results_label.pack(pady=10)
         self.results_frame.pack(padx=20, pady=10, fill="x")
 
-        self.results_listbox.pack(
-            side="left",
-            fill="both",
-            expand=True
-        )
-
-        self.results_scrollbar.pack(
-            side="right",
-            fill="y"
-        )
+        self.results_listbox.pack(side="left", fill="both", expand=True)
+        self.results_scrollbar.pack(side="right", fill="y")
 
         # TEMP: Adding preference widgets to the layout
         self.clear_history_button.pack(pady=10)
@@ -146,6 +121,7 @@ class AppWindow(tk.Tk):
         self.preference_frame.pack(padx=20, pady=(10,30), fill="x")
         self.preference_listbox.pack(side="left", fill="both", expand=True)
         self.preference_scrollbar.pack(side="right", fill="y")
+        self.clear_preferences_button.pack(pady=(5,20))
 
     # TEMP: This is the function that will be called when the search button is clicked.
     def _on_search(self):
@@ -280,3 +256,11 @@ class AppWindow(tk.Tk):
             self.db_repo.clear_recommendation_history()
             self._display_results([])
             messagebox.showinfo("History Cleared", "Recommendation history has been cleared.")
+
+    def _on_clear_preferences(self):
+        confirmed = messagebox.askyesno("Clear Preference Profile", "Are you sure you want to clear Your preference profile?\n\nThis action cannot be undone.") 
+        if confirmed:
+            self.db_repo.clear_preferences()
+            self.preference_profile = self._load_preference_profile()
+            self._display_preferences()
+            messagebox.showinfo("Preferences Cleared", "Preference profile has been cleared.")

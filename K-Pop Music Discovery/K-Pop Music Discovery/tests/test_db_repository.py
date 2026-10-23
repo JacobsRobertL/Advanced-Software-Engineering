@@ -69,3 +69,58 @@ def test_save_generated_recommendations():
         ("Howling", "XG"),
         ("Lemonade", "aespa")
     ]
+
+def test_add_and_get_preferences(tmp_path):
+    db = DatabaseRepository()
+    db.database_name = tmp_path / "test_kpop.db"
+    db.initialize_database()
+
+    db.add_preference("artist", "aespa")
+    db.add_preference("tag", "k-pop")
+
+    preferences = db.get_preferences()
+
+    assert ("artist", "aespa") in preferences
+    assert ("tag", "k-pop") in preferences
+    assert len(preferences) == 2
+
+
+def test_duplicate_preferences_not_saved(tmp_path):
+    db = DatabaseRepository()
+    db.database_name = tmp_path / "test_kpop.db"
+    db.initialize_database()
+
+    db.add_preference("artist", "aespa")
+    db.add_preference("artist", "aespa")
+
+    assert db.get_preferences() == [("artist", "aespa")]
+
+
+def test_clear_preferences(tmp_path):
+    db = DatabaseRepository()
+    db.database_name = tmp_path / "test_kpop.db"
+    db.initialize_database()
+
+    db.add_preference("artist", "aespa")
+    db.add_preference("tag", "k-pop")
+    db.save_recommendation("Howling", "XG")
+
+    db.clear_preferences()
+
+    assert db.get_preferences() == []
+    assert len(db.get_recommendation_history()) == 1
+
+
+def test_clear_recommendation_history(tmp_path):
+    db = DatabaseRepository()
+    db.database_name = tmp_path / "test_kpop.db"
+    db.initialize_database()
+
+    db.add_preference("artist", "aespa")
+    db.save_recommendation("Howling", "XG")
+    db.save_recommendation("Lemonade", "aespa")
+
+    db.clear_recommendation_history()
+
+    assert db.get_recommendation_history() == []
+    assert db.get_preferences() == [("artist", "aespa")]

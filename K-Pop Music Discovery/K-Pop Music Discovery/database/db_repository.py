@@ -123,6 +123,13 @@ class DatabaseRepository:
         connection.commit()
         connection.close()
 
+    def clear_preferences(self):
+        connection = sqlite3.connect(self.database_name)
+
+        connection.execute("DELETE FROM preferences")
+        connection.commit()
+        connection.close()
+
 if __name__ == "__main__":
     db = DatabaseRepository()
 

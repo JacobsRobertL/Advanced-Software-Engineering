@@ -1,4 +1,4 @@
-from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag, add_track_tags, remove_unusable_tracks, remove_duplicate_recommendations, remove_previously_recommended, parse_similar_artists, generate_discovery_recommendations
+from services.recommendation_service import get_candidate_tracks, generate_recommendations, filter_by_artist, parse_tag_data, filter_by_tag, add_track_tags, remove_unusable_tracks, remove_duplicate_recommendations, remove_previously_recommended, parse_similar_artists, generate_discovery_recommendations, parse_artist_search_results
 
 def test_get_candidate_tracks():
     # Mock the fetch_tracks function to return a predefined response
@@ -228,3 +228,22 @@ def test_generate_discovery_recommendations():
         {"title": "XG Song", "artist": "XG"},
         {"title": "Similar Artist Song", "artist": "Similar Artist"}
     ]
+
+def test_parse_artist_search_results():
+    response = {
+        "results": {
+            "artistmatches": {
+                "artist": [
+                    {"name": "aespa"},
+                    {"name": "XG"},
+                    {"name": ""}
+                ]
+            }
+        }
+    }
+
+    result = parse_artist_search_results(response)
+
+    assert len(result) == 2
+    assert result[0] == {"type": "artist", "artist": "aespa", "title": None}
+    assert result[1] == {"type": "artist", "artist": "XG", "title": None}

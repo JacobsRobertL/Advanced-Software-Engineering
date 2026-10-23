@@ -131,6 +131,14 @@ def parse_similar_artists(response):
         if isinstance(artist.get("name"), str) and artist["name"].strip()
     ]
 
+def parse_artist_search_results(response):
+    artists = response.get("results", {}).get("artistmatches", {}).get("artist", [])
+
+    return [
+        {"type": "artist", "artist": artist["name"], "title": None}
+        for artist in artists
+        if isinstance(artist, dict) and isinstance(artist.get("name"), str) and artist["name"].strip()
+    ]
 
 def generate_discovery_recommendations(preferred_artists, fetch_similar, fetch_tracks):
     artists_to_search = list(preferred_artists)

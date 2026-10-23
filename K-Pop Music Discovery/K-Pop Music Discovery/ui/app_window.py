@@ -81,11 +81,25 @@ class AppWindow(tk.Tk):
         self.search_button = ttk.Button(self.search_frame, text="Search", command=self._on_search, style="Action.TButton")
         self.search_entry.bind("<Return>", lambda event: self._on_search())
         
-        self.results_label = ttk.Label(self, text="Search Results:", font=("Segoe UI", 10))
+        # Search result containers
         self.results_frame = ttk.Frame(self)
-        self.results_listbox = tk.Listbox(self.results_frame, height=5)
-        self.results_scrollbar = ttk.Scrollbar(self.results_frame, orient="vertical", command=self.results_listbox.yview)
-        self.results_listbox.configure(yscrollcommand=self.results_scrollbar.set)
+
+        # Artist results
+        self.artist_results_frame = ttk.Frame(self.results_frame)
+        self.artist_results_label = ttk.Label(self.artist_results_frame, text="Artists:", font=("Segoe UI", 10, "bold"))
+        self.artist_results_listbox = tk.Listbox(self.artist_results_frame, height=5, exportselection=False)
+        self.artist_results_scrollbar = ttk.Scrollbar(self.artist_results_frame, orient="vertical", command=self.artist_results_listbox.yview)
+        self.artist_results_listbox.configure(yscrollcommand=self.artist_results_scrollbar.set)
+        self.artist_results_listbox.bind("<<ListboxSelect>>", self._on_artist_selected)
+
+        # Song results
+        self.track_results_frame = ttk.Frame(self.results_frame)
+        self.track_results_label = ttk.Label(self.track_results_frame, text="Songs:", font=("Segoe UI", 10, "bold"))
+        self.track_results_listbox = tk.Listbox(self.track_results_frame, height=5, exportselection=False)
+        self.track_results_scrollbar = ttk.Scrollbar(self.track_results_frame, orient="vertical", command=self.track_results_listbox.yview)
+        self.track_results_listbox.configure(yscrollcommand=self.track_results_scrollbar.set)
+        self.track_results_listbox.bind("<<ListboxSelect>>", self._on_track_selected)
+        self.add_selected_button = ttk.Button(self.results_frame, text="Add Selected to Preferences", style="Action.TButton", command=self._on_add_selected_preference)
         
         self.discovery_label = ttk.Label(self.discovery_header_frame, text="3. Discover Music:", font=("Segoe UI", 11, "bold"))
         self.discovery_frame = ttk.Frame(self)
@@ -101,7 +115,7 @@ class AppWindow(tk.Tk):
     # TEMP: Adding preference widgets
         self.preference_input_frame = ttk.Frame(self)
         self.preference_var = tk.StringVar()
-        self.preference_type_var = tk.StringVar(value="artist")
+        self.preference_type_var = tk.StringVar(value="Artist")
         self.preference_label = ttk.Label(self.preference_header_frame, text="2. Your Preferences:", font=("Segoe UI", 11, "bold"))
         self.preference_type_dropdown = ttk.Combobox(self.preference_input_frame, textvariable=self.preference_type_var, values=["Artist", "Tag"], state="readonly", width = 12)
         self.preference_entry = ttk.Entry(self.preference_input_frame, textvariable=self.preference_var)
@@ -141,10 +155,20 @@ class AppWindow(tk.Tk):
         self.search_frame.pack(padx=20, pady=5, fill="x")
         self.search_entry.pack(side="left", fill="x", expand=True, padx=(0,10))
         self.search_button.pack(side="right")
-        self.results_label.pack(anchor="w", padx=20, pady=(10, 5))
-        self.results_frame.pack(padx=20, pady=(5,10), fill="x")
-        self.results_listbox.pack(side="left", fill="both", expand=True)
-        self.results_scrollbar.pack(side="right", fill="y")
+        self.results_frame.pack(fill="x", padx=20, pady=(8, 0))
+        self.add_selected_button.pack(side="bottom", pady=(10, 0))
+
+        self.artist_results_frame.pack(side="left", fill="both", expand=True, padx=(0, 6))
+        self.track_results_frame.pack(side="left", fill="both", expand=True, padx=(6, 0))
+
+        self.artist_results_label.pack(anchor="w", pady=(0, 4))
+        self.track_results_label.pack(anchor="w", pady=(0, 4))
+
+        self.artist_results_scrollbar.pack(side="right", fill="y")
+        self.artist_results_listbox.pack(side="left", fill="both", expand=True)
+
+        self.track_results_scrollbar.pack(side="right", fill="y")
+        self.track_results_listbox.pack(side="left", fill="both", expand=True)
 
         # Separator
         self.search_separator.pack(padx=20, pady=(18,18), fill="x")
@@ -179,7 +203,6 @@ class AppWindow(tk.Tk):
 
     # TEMP: This is the function that will be called when the search button is clicked.
     def _on_search(self):
-
         if self.search_in_progress:
             return
 
@@ -190,26 +213,30 @@ class AppWindow(tk.Tk):
         self.search_in_progress = True
         self.search_button.configure(state="disabled")
 
-        # TEMP: Need to rework the search as we are now searching for similar artists and tracks as opposed to filtering on returned results that match the initial search
         artist_response = search_artists(search_term)
         track_response = search_tracks(search_term)
 
         artists = parse_artist_search_results(artist_response)
         tracks = parse_track_search_results(track_response)
 
-        self.search_results = artists + tracks
+        self.artist_search_results = artists
+        self.track_search_results = tracks
 
-        results = []
-        for item in self.search_results:
-            if item["type"] == "artist":
-                results.append(f"Artist: {item['artist']}")
-            else:
-                results.append(f"Song: {item['title']} - {item['artist']}")
+        self.artist_results_listbox.delete(0, tk.END)
+        self.track_results_listbox.delete(0, tk.END)
 
-        if not results:
-            results = ["No matching artist or songs found."]
+        for artist in artists:
+            self.artist_results_listbox.insert(tk.END, artist["artist"])
 
-        self._display_results(results)
+        for track in tracks:
+            self.track_results_listbox.insert(tk.END, f"{track['title']} — {track['artist']}")
+
+        if not artists:
+            self.artist_results_listbox.insert(tk.END, "No artists found.")
+
+        if not tracks:
+            self.track_results_listbox.insert(tk.END, "No songs found.")
+
         self._finish_search()
 
 
@@ -229,7 +256,15 @@ class AppWindow(tk.Tk):
         self.discovery_listbox.delete(0, tk.END)
 
         for recommendation in recommendations:
-            self.discovery_listbox.inster(tk.END, recommendation)
+            self.discovery_listbox.insert(tk.END, recommendation)
+
+    def _on_artist_selected(self, event):
+        if self.artist_results_listbox.curselection():
+            self.track_results_listbox.selection_clear(0, tk.END)
+
+    def _on_track_selected(self, event):
+        if self.track_results_listbox.curselection():
+            self.artist_results_listbox.selection_clear(0, tk.END)
 
 
     # TEMP callback for adding preferences
@@ -304,3 +339,26 @@ class AppWindow(tk.Tk):
         print("Discover button clicked")
         print("Preferred artists:", preferred_artists)
         print("Preferred tags:", preferred_tags)
+
+    def _on_add_selected_preference(self):
+        artist_selection = self.artist_results_listbox.curselection()
+        track_selection = self.track_results_listbox.curselection()
+
+        if artist_selection:
+            index = artist_selection[0]
+            artist_name = self.artist_search_results[index]["artist"]
+
+        elif track_selection:
+            index = track_selection[0]
+            artist_name = self.track_search_results[index]["artist"]
+
+        else:
+            messagebox.showinfo("No Selection", "Please select an artist or song first.")
+            return
+
+        self.db_repo.add_preference("artist", artist_name)
+
+        self.preference_profile = self._load_preference_profile()
+        self._display_preferences()
+
+        messagebox.showinfo("Preference Added", f"Added {artist_name} to your preferences.")

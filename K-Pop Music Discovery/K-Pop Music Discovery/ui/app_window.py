@@ -283,7 +283,11 @@ class AppWindow(tk.Tk):
         
         preference_type = self.preference_type_var.get()
 
-        self.db_repo.add_preference(preference_type, preference)
+        if preference_type.strip().casefold() == "tag" and self.db_repo.has_equivalent_tag(preference):
+            messagebox.showinfo("Duplicate Tag", f"An equivalent tag preference already exists: {preference}")
+            return
+
+        self.db_repo.add_preference(preference_type.strip().lower(), preference)
 
         print(f"Preference added: {preference}")  # TEMP: Placeholder for actual functionality
 
@@ -446,7 +450,8 @@ class AppWindow(tk.Tk):
                 return
 
             for tag in selected_tags:
-                self.db_repo.add_preference("tag", tag)
+                if not self.db_repo.has_equivalent_tag(tag):
+                    self.db_repo.add_preference("tag", tag)
 
             self.preference_profile = self._load_preference_profile()
             self._display_preferences()

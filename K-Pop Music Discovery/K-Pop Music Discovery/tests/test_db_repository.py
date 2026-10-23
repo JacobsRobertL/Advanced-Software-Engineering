@@ -148,3 +148,15 @@ def test_clear_recommendation_history(tmp_path):
 
     assert db.get_recommendation_history() == []
     assert db.get_preferences() == [("artist", "aespa")]
+
+def test_equivalent_tag_preferences(tmp_path):
+    db = DatabaseRepository()
+    db.database_name = tmp_path / "test_kpop.db"
+    db.initialize_database()
+
+    db.add_preference("tag", "Hip-Hop")
+
+    assert db.has_equivalent_tag("hiphop") is True
+    assert db.has_equivalent_tag("HIP HOP") is True
+    assert db.has_equivalent_tag("hip-hop") is True
+    assert db.has_equivalent_tag("dance") is False

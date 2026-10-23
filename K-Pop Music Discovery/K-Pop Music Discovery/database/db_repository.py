@@ -90,6 +90,18 @@ class DatabaseRepository:
         connection.commit()
         connection.close()
 
+    def has_equivalent_tag(self, tag_value):
+        from services.recommendation_service import normalize_tag
+
+        normalized_value = normalize_tag(tag_value)
+
+        for preference_type, preference_value in self.get_preferences():
+            if preference_type.strip().casefold() == "tag":
+                if normalize_tag(preference_value) == normalized_value:
+                    return True
+
+        return False
+
     def get_preferences(self):
         connection = sqlite3.connect(self.database_name)
         cursor = connection.cursor()

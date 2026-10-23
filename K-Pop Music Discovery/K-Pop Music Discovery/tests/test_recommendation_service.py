@@ -11,7 +11,8 @@ from services.recommendation_service import (
     parse_similar_artists, 
     generate_discovery_recommendations, 
     parse_artist_search_results, 
-    parse_track_search_results
+    parse_track_search_results,
+    get_selectable_song_tags
 )
 
 def test_get_candidate_tracks():
@@ -280,3 +281,21 @@ def test_parse_track_search_results():
     assert len(result) == 2
     assert result[0] == {"type": "track", "artist": "aespa", "title": "Drama"}
     assert result[1] == {"type": "track", "artist": "XG", "title": "WOKE UP"}
+
+def test_get_selectable_song_tags():
+    response = {
+        "toptags": {
+            "tag": [
+                {"name": "k-pop"},
+                {"name": "Electropop"},
+                {"name": "K-POP"},
+                {"name": ""},
+                {"name": "dance"}
+            ]
+        }
+    }
+
+    result = get_selectable_song_tags(response)
+
+    assert len(result) == 3
+    assert result == ["k-pop", "Electropop", "dance"]

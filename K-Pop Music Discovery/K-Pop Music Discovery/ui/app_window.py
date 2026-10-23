@@ -20,7 +20,8 @@ from services.recommendation_service import (
     add_track_tags,
     filter_by_tag,
     parse_artist_search_results,
-    parse_track_search_results
+    parse_track_search_results,
+    get_selectable_song_tags
     )
 
 # Window presets
@@ -99,8 +100,10 @@ class AppWindow(tk.Tk):
         self.track_results_scrollbar = ttk.Scrollbar(self.track_results_frame, orient="vertical", command=self.track_results_listbox.yview)
         self.track_results_listbox.configure(yscrollcommand=self.track_results_scrollbar.set)
         self.track_results_listbox.bind("<<ListboxSelect>>", self._on_track_selected)
-        self.add_selected_button = ttk.Button(self.results_frame, text="Add Selected to Preferences", style="Action.TButton", command=self._on_add_selected_preference)
-        
+        self.search_actions_frame = ttk.Frame(self.results_frame)
+        self.add_selected_button = ttk.Button(self.search_actions_frame, text="Add Selected to Preferences", style="Action.TButton", command=self._on_add_selected_preference)
+        self.view_tags_button = ttk.Button(self.search_actions_frame, text="View Song Tags", style="Action.TButton", command=self._on_view_song_tags)
+       
         self.discovery_label = ttk.Label(self.discovery_header_frame, text="3. Discover Music:", font=("Segoe UI", 11, "bold"))
         self.discovery_frame = ttk.Frame(self)
         self.discovery_listbox = tk.Listbox(self.discovery_frame, height = 5)
@@ -156,7 +159,9 @@ class AppWindow(tk.Tk):
         self.search_entry.pack(side="left", fill="x", expand=True, padx=(0,10))
         self.search_button.pack(side="right")
         self.results_frame.pack(fill="x", padx=20, pady=(8, 0))
-        self.add_selected_button.pack(side="bottom", pady=(10, 0))
+        self.search_actions_frame.pack(side="bottom", pady=(10, 0))
+        self.add_selected_button.pack(side="left", padx=(0, 8))
+        self.view_tags_button.pack(side="left")
 
         self.artist_results_frame.pack(side="left", fill="both", expand=True, padx=(0, 6))
         self.track_results_frame.pack(side="left", fill="both", expand=True, padx=(6, 0))
@@ -362,3 +367,23 @@ class AppWindow(tk.Tk):
         self._display_preferences()
 
         messagebox.showinfo("Preference Added", f"Added {artist_name} to your preferences.")
+
+    def _on_view_song_tags(self):
+        selection = self.track_results_listbox.curselection()
+
+        if not selection:
+            messagebox.showinfo("No Song Selected", "Please select a song first.")
+            return
+
+        index = selection[0]
+        track = self.track_search_results[index]
+
+        popup = tk.Toplevel(self)
+        popup.title("Song Tags")
+        popup.geometry("400x300")
+        popup.resizable(False, False)
+        popup.configure(background="#F0F0F0")
+
+        ttk.Label(popup, text=f"{track['title']} — {track['artist']}", font=("Segoe UI", 12, "bold")).pack(pady=(20, 10))
+        ttk.Label(popup, text="Available song tags will appear here.").pack(pady=10)
+        ttk.Button(popup, text="Close", command=popup.destroy, style="Action.TButton").pack(pady=15)

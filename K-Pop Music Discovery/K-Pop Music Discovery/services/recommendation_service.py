@@ -172,6 +172,32 @@ def generate_discovery_recommendations(preferred_artists, fetch_similar, fetch_t
 
     return generate_recommendations(unique_artists, fetch_tracks)
 
+def get_selectable_song_tags(response):
+    tags = response.get("toptags", {}).get("tag", [])
+
+    tag_names = []
+    seen = set()
+
+    for tag in tags:
+        if not isinstance(tag, dict):
+            continue
+
+        name = tag.get("name")
+
+        if not isinstance(name, str) or not name.strip():
+            continue
+
+        name = name.strip()
+
+        if name.casefold() not in seen:
+            seen.add(name.casefold())
+            tag_names.append(name)
+
+        if len(tag_names) == 10:
+            break
+
+    return tag_names
+
 if __name__ == "__main__":  #For testing purposes outside of a unit test framework
     # TEMP
     # artists = ["XG", "NewJeans", "Mamamoo"]

@@ -1,10 +1,22 @@
 # Create the main application window and all logic pertaining to the UI
 
 import tkinter as tk
-from tkinter import ttk
+from tkinter import ttk, messagebox
 
-from api.lastfm_client import get_top_tracks
-from services.recommendation_service import generate_recommendations, save_generated_recommendations, remove_duplicate_recommendations, remove_previously_recommended
+from api.lastfm_client import (
+    get_top_tracks,
+    get_song_tags,
+    )
+
+from services.recommendation_service import (
+    generate_recommendations,
+    save_generated_recommendations,
+    remove_duplicate_recommendations,
+    remove_previously_recommended,
+    filter_by_artist,
+    add_track_tags,
+    filter_by_tag,
+    )
 
 # Window presets
 WINDOW_WIDTH = 800
@@ -62,6 +74,8 @@ class AppWindow(tk.Tk):
             yscrollcommand=self.results_scrollbar.set
         )
 
+        self.clear_history_button = ttk.Button(self, text="Clear Recommendation History", command=self._on_clear_history)
+
     # TEMP: Adding preference widgets
         self.preference_var = tk.StringVar()
         self.preference_label = ttk.Label(self, text="Favorite Artist:")
@@ -98,6 +112,8 @@ class AppWindow(tk.Tk):
         self.add_preference_button.pack(pady=10)
         self.preference_listbox.pack(padx=20, pady=10, fill="x")
 
+        self.clear_history_button.pack(pady=10)
+
     # TEMP: This is the function that will be called when the search button is clicked.
     def _on_search(self):
         # TEMP: Grab the term from the box and strip whitespace
@@ -111,13 +127,31 @@ class AppWindow(tk.Tk):
                 [search_term],
                 get_top_tracks
             )
+        print("After generating recommendations:", len(recommendations))
+
+        recommendations = filter_by_artist(recommendations, [search_term])
+        # TEMP: print("After artist filtering:", len(recommendations))
 
         recommendations = remove_duplicate_recommendations(recommendations)
+        #TEMP: print("After duplicate removal:", len(recommendations))
 
         history = self.db_repo.get_recommendation_history()
+        #TEMP: print("History count:", len(history))
 
         recommendations = remove_previously_recommended(recommendations, history)
+        #TEMP: print("After history filtering:", len(recommendations))
 
+        recommendations = add_track_tags(recommendations, get_song_tags)
+
+        # preferred_tags = self.preference_profile["tags"]
+
+        # if preferred_tags:
+        #     recommendations = filter_by_tag(recommendations, preferred_tags)
+
+        # TEMP: Temporarily print the recommendations to the console for debugging
+        for track in recommendations:
+            print(f"Recommended: {track['artist']} - {track['title']}")
+            print(f"Tags: {track['tags']}")
 
         # Save the recommendations to SQLite
         save_generated_recommendations(
@@ -173,3 +207,10 @@ class AppWindow(tk.Tk):
                 profile["tags"].append(preference_value)
 
         return profile
+
+    def _on_clear_history(self):
+        confirmed = messagebox.askyesno("Clear Recommendation History", "Are you sure you want to clear the recommendation history?\n\nThis action cannot be undone.") 
+        if confirmed:
+            self.db_repo.clear_recommendation_history()
+            self._display_results([])
+            messagebox.showinfo("History Cleared", "Recommendation history has been cleared.")

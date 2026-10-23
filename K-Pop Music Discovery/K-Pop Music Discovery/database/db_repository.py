@@ -116,6 +116,13 @@ class DatabaseRepository:
         connection.close()
         return history
 
+    def clear_recommendation_history(self):
+        connection = sqlite3.connect(self.database_name)
+
+        connection.execute("DELETE FROM recommendations")
+        connection.commit()
+        connection.close()
+
 if __name__ == "__main__":
     db = DatabaseRepository()
 

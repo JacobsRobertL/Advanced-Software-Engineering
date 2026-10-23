@@ -78,10 +78,32 @@ class AppWindow(tk.Tk):
 
     # TEMP: Adding preference widgets
         self.preference_var = tk.StringVar()
-        self.preference_label = ttk.Label(self, text="Favorite Artist:")
+        self.preference_type_var = tk.StringVar(value="artist")
+        self.preference_label = ttk.Label(self, text="Add a favorite artist or tag:")
+        self.preference_type_dropdown = ttk.Combobox(
+            self,
+            textvariable=self.preference_type_var,
+            values=["artist", "tag"],
+            state="readonly",
+            width = 12
+        )
         self.preference_entry = ttk.Entry(self, textvariable=self.preference_var)
+        self.preference_placeholder = "Enter artist or tag"
+        self.preference_var.set(self.preference_placeholder)
+        self.preference_entry.bind("<FocusIn>", self._on_preference_focus_in)
+        self.preference_entry.bind("<FocusOut>", self._on_preference_focus_out)
+
         self.add_preference_button = ttk.Button(self, text="Add Preference", command=self._on_add_preference)
         self.preference_listbox = tk.Listbox(self, height=5)
+
+    def _on_preference_focus_in(self, event):
+        if self.preference_var.get() == self.preference_placeholder:
+            self.preference_var.set("")
+
+
+    def _on_preference_focus_out(self, event):
+        if not self.preference_var.get().strip():
+            self.preference_var.set(self.preference_placeholder)
 
     # TEMP: This places the widgets
     def _layout_widgets(self):
@@ -106,7 +128,9 @@ class AppWindow(tk.Tk):
         )
 
         # TEMP: Adding preference widgets to the layout
+        self.clear_history_button.pack(pady=10)
         self.preference_label.pack(pady=(10, 0))
+        self.preference_type_dropdown.pack(pady=5)
         self.preference_entry.pack(padx = 20, pady=5, fill=tk.X)
 
         self.add_preference_button.pack(pady=10)
@@ -143,10 +167,12 @@ class AppWindow(tk.Tk):
 
         recommendations = add_track_tags(recommendations, get_song_tags)
 
-        # preferred_tags = self.preference_profile["tags"]
+        preferred_tags = self.preference_profile["tags"]
 
-        # if preferred_tags:
-        #     recommendations = filter_by_tag(recommendations, preferred_tags)
+        if preferred_tags:
+            recommendations = filter_by_tag(recommendations, preferred_tags)
+
+        print("After tag filtering:", len(recommendations))
 
         # TEMP: Temporarily print the recommendations to the console for debugging
         for track in recommendations:
@@ -182,14 +208,16 @@ class AppWindow(tk.Tk):
     # TEMP callback for adding preferences
     def _on_add_preference(self):
         preference = self.preference_var.get().strip()
-        if not preference:
+        if not preference or preference == self.preference_placeholder:
             return  # TEMP: Do nothing if the preference is empty
         
-        self.db_repo.add_preference("artist", preference)  # TEMP: Assuming "artist" is the type for now
+        preference_type = self.preference_type_var.get()
+
+        self.db_repo.add_preference(preference_type, preference)
 
         print(f"Preference added: {preference}")  # TEMP: Placeholder for actual functionality
 
-        self.preference_var.set("")  # Clear the entry after adding preference
+        self.preference_var.set(self.preference_placeholder)  # Clear the entry after adding preference
 
         self.preference_profile = self._load_preference_profile()  # Reload the preference profile
 

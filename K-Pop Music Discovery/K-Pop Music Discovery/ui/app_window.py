@@ -23,7 +23,8 @@ from services.recommendation_service import (
     parse_artist_search_results,
     parse_track_search_results,
     get_selectable_song_tags,
-    generate_discovery_recommendations
+    generate_discovery_recommendations,
+    score_recommendations
     )
 
 # Window presets
@@ -323,7 +324,7 @@ class AppWindow(tk.Tk):
         confirmed = messagebox.askyesno("Clear Recommendation History", "Are you sure you want to clear the recommendation history?\n\nThis action cannot be undone.") 
         if confirmed:
             self.db_repo.clear_recommendation_history()
-            self._display_results([])
+            self._display_discoveries([])
             messagebox.showinfo("History Cleared", "Recommendation history has been cleared.")
 
     def _on_clear_preferences(self):
@@ -355,12 +356,18 @@ class AppWindow(tk.Tk):
 
         history = self.db_repo.get_recommendation_history()
         recommendations = remove_previously_recommended(recommendations, history)
-        save_generated_recommendations(recommendations, self.db_repo.save_recommendation)
+        
+        if preferred_tags and recommendations:
+            recommendations = add_track_tags(recommendations, get_song_tags)
 
+        recommendations = score_recommendations(recommendations, preferred_tags)
+
+        save_generated_recommendations(recommendations, self.db_repo.save_recommendation)
+        
         display_results = []
 
         for track in recommendations:
-            display_results.append(f"{track['title']} — {track['artist']}")
+            display_results.append(f"{track['title']} — {track['artist']} (Score: {track['score']})'")
 
         self._display_discoveries(display_results)
         print("PREFERENCES LISTBOX AFTER DISCOVER:", self.preference_listbox.get(0, tk.END))

@@ -12,7 +12,8 @@ from services.recommendation_service import (
     generate_discovery_recommendations, 
     parse_artist_search_results, 
     parse_track_search_results,
-    get_selectable_song_tags
+    get_selectable_song_tags,
+    score_recommendations
 )
 
 def test_get_candidate_tracks():
@@ -299,3 +300,20 @@ def test_get_selectable_song_tags():
 
     assert len(result) == 3
     assert result == ["k-pop", "Electropop", "dance"]
+
+
+def test_score_recommendations():
+    recommendations = [
+        {"title": "Song A", "artist": "XG", "tags": ["hip-hop", "k-pop"]},
+        {"title": "Song B", "artist": "aespa", "tags": ["dance"]},
+        {"title": "Song C", "artist": "XG", "tags": ["HIP-HOP", "rap"]}
+    ]
+
+    ranked = score_recommendations(recommendations, ["hip-hop", "rap"])
+
+    assert ranked[0]["title"] == "Song C"
+    assert ranked[0]["score"] == 2
+    assert ranked[1]["title"] == "Song A"
+    assert ranked[1]["score"] == 1
+    assert ranked[2]["title"] == "Song B"
+    assert ranked[2]["score"] == 0

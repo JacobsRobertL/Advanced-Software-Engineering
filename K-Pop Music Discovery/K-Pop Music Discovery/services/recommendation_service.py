@@ -61,6 +61,20 @@ def filter_by_tag(recommendations, tag_name):
 
     return filtered
 
+def score_recommendations(recommendations, preferred_tags):
+    normalized_tags = {tag.strip().casefold() for tag in preferred_tags}
+
+    for track in recommendations:
+        track_tags = {
+            tag.strip().casefold()
+            for tag in track.get("tags", [])
+            if isinstance(tag, str)
+        }
+
+        track["score"] = len(track_tags.intersection(normalized_tags))
+
+    return sorted(recommendations, key=lambda track: track["score"], reverse=True)
+
 def add_track_tags(recommendations, fetch_tags):
     for track in recommendations:
         response = fetch_tags(track["artist"], track["title"])

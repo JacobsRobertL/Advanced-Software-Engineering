@@ -385,5 +385,14 @@ class AppWindow(tk.Tk):
         popup.configure(background="#F0F0F0")
 
         ttk.Label(popup, text=f"{track['title']} — {track['artist']}", font=("Segoe UI", 12, "bold")).pack(pady=(20, 10))
-        ttk.Label(popup, text="Available song tags will appear here.").pack(pady=10)
+        
+        response = get_song_tags(track["artist"], track["title"])
+        tags = get_selectable_song_tags(response)
+
+        if tags:
+            for tag in tags:
+                ttk.Label(popup, text=tag).pack(anchor="w", padx=30, pady=2)
+        else:
+            ttk.Label(popup, text="No tags available for this song").pack(pady=10)
+
         ttk.Button(popup, text="Close", command=popup.destroy, style="Action.TButton").pack(pady=15)

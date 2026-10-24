@@ -35,6 +35,7 @@
     <Compile Include="services\recommendation_service.py" />
     <Compile Include="tests\test_db_repository.py" />
     <Compile Include="tests\test_lastfm_client.py" />
+    <Compile Include="tests\test_musicbrainz_adapter.py" />
     <Compile Include="tests\test_musicbrainz_client.py" />
     <Compile Include="tests\test_recommendation_service.py" />
     <Compile Include="tests\test_app_window.py" />

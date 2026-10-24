@@ -24,8 +24,11 @@ from services.recommendation_service import (
     parse_track_search_results,
     get_selectable_song_tags,
     generate_discovery_recommendations,
-    score_recommendations
+    score_recommendations,
+    enrich_recommendations
     )
+
+from adapters.musicbrainz_adapter import MusicBrainzAdapter
 
 # Window presets
 WINDOW_WIDTH = 800
@@ -366,12 +369,16 @@ class AppWindow(tk.Tk):
 
         recommendations = score_recommendations(recommendations, preferred_tags)
 
+        adapter = MusicBrainzAdapter()
+        recommendations = enrich_recommendations(recommendations, adapter, limit=3)
+
         save_generated_recommendations(recommendations, self.db_repo.save_recommendation)
         
         display_results = []
 
         for track in recommendations:
-            display_results.append(f"{track['title']} — {track['artist']} (Score: {track['score']})'")
+            recording_id = track.get("musicbrainz_id", "Not matched")
+            display_results.append(f"{track['title']} — {track['artist']} (Score: {track['score']}, MBID: {recording_id})")
 
         self._display_discoveries(display_results)
         print("PREFERENCES LISTBOX AFTER DISCOVER:", self.preference_listbox.get(0, tk.END))

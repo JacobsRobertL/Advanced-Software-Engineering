@@ -1,3 +1,6 @@
+import time
+import requests
+
 from api.lastfm_client import get_artist_info, get_top_tracks
 
 def parse_track_data(response):
@@ -77,6 +80,25 @@ def score_recommendations(recommendations, preferred_tags):
         track["score"] = len(track_tags.intersection(normalized_tags))
 
     return sorted(recommendations, key=lambda track: track["score"], reverse=True)
+
+def enrich_recommendations(recommendations, metadata_provider, limit=3):
+    for index, track in enumerate(recommendations[:limit]):
+        if index > 0:
+            time.sleep(1.1)
+
+        try:
+            metadata = metadata_provider.get_recording_metadata(
+                track["artist"], track["title"]
+            )
+        except requests.exceptions.RequestException as error:
+            print(f"MusicBrainz request failed: {error}")
+            continue
+
+        if metadata:
+            track["musicbrainz_id"] = metadata["musicbrainz_id"]
+            track["match_score"] = metadata["match_score"]
+
+    return recommendations
 
 def add_track_tags(recommendations, fetch_tags):
     for track in recommendations:

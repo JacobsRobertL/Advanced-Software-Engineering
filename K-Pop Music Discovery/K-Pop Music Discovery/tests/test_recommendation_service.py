@@ -14,7 +14,8 @@ from services.recommendation_service import (
     parse_track_search_results,
     get_selectable_song_tags,
     score_recommendations,
-    normalize_tag
+    normalize_tag,
+    enrich_recommendations
 )
 
 def test_get_candidate_tracks():
@@ -337,3 +338,45 @@ def test_score_recommendations_normalizes_tag_variations():
     assert ranked[0]["score"] == 1
     assert ranked[1]["score"] == 1
     assert ranked[2]["score"] == 0
+
+def test_enrich_recommendations():
+    class FakeMetadataProvider:
+        def get_recording_metadata(self, artist, title):
+            return {
+                "musicbrainz_id": "test-id",
+                "match_score": 100
+            }
+
+    recommendations = [
+        {"title": "Song A", "artist": "XG"},
+        {"title": "Song B", "artist": "aespa"},
+        {"title": "Song C", "artist": "BTS"},
+        {"title": "Song D", "artist": "TWICE"}
+    ]
+
+    result = enrich_recommendations(
+        recommendations, FakeMetadataProvider(), limit=3
+    )
+
+    assert all("musicbrainz_id" in track for track in result[:3])
+    assert "musicbrainz_id" not in result[3]
+    assert result[0]["musicbrainz_id"] == "test-id"
+
+def test_enrich_recommendations_handles_api_failure():
+    import requests
+
+    class FailingMetadataProvider:
+        def get_recording_metadata(self, artist, title):
+            raise requests.exceptions.Timeout("MusicBrainz timed out")
+
+    recommendations = [
+        {"title": "WOKE UP", "artist": "XG"}
+    ]
+
+    result = enrich_recommendations(
+        recommendations, FailingMetadataProvider()
+    )
+
+    assert len(result) == 1
+    assert result[0]["title"] == "WOKE UP"
+    assert "musicbrainz_id" not in result[0]

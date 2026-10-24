@@ -129,6 +129,85 @@ class DatabaseRepository:
         connection.commit()
         connection.close()
 
+    def save_rating(self, title, artist, rating):
+        if not isinstance(rating, int) or isinstance(rating, bool) or not 1 <= rating <= 5:
+            raise ValueError("Rating must be an integer between 1 and 5.")
+
+        connection = sqlite3.connect(self.database_name)
+        connection.execute("PRAGMA foreign_keys = ON;")
+
+        try:
+            cursor = connection.cursor()
+
+            cursor.execute(
+                "SELECT song_id FROM songs WHERE title = ? AND artist = ?",
+                (title, artist)
+            )
+            song = cursor.fetchone()
+
+            if song is None:
+                raise ValueError("Song must be saved before it can be rated.")
+
+            cursor.execute("""
+                INSERT INTO ratings (song_id, rating)
+                VALUES (?, ?)
+                ON CONFLICT(song_id) DO UPDATE SET rating = excluded.rating
+            """, (song[0], rating))
+
+            connection.commit()
+        finally:
+            connection.close()
+
+    def get_song_rating(self, title, artist):
+        connection = sqlite3.connect(self.database_name)
+
+        try:
+            cursor = connection.cursor()
+
+            cursor.execute("""
+                SELECT ratings.rating
+                FROM ratings
+                JOIN songs ON ratings.song_id = songs.song_id
+                WHERE songs.title = ? AND songs.artist = ?
+            """, (title, artist))
+
+            result = cursor.fetchone()
+
+            return result[0] if result else None
+        finally:
+            connection.close()
+
+    def get_rated_songs(self):
+        connection = sqlite3.connect(self.database_name)
+
+        try:
+            cursor = connection.cursor()
+            cursor.execute("""
+                SELECT songs.title, songs.artist, ratings.rating
+                FROM ratings
+                JOIN songs ON ratings.song_id = songs.song_id
+                ORDER BY songs.artist, songs.title
+            """)
+            return cursor.fetchall()
+        finally:
+            connection.close()
+
+    def get_artist_rating_adjustments(self):
+        rated_songs = self.get_rated_songs()
+        artist_ratings = {}
+
+        for title, artist, rating in rated_songs:
+            artist_key = artist.strip().casefold()
+            artist_ratings.setdefault(artist_key, []).append(rating)
+
+        adjustments = {}
+
+        for artist, ratings in artist_ratings.items():
+            average_rating = sum(ratings) / len(ratings)
+            adjustments[artist] = round((average_rating - 3) * 1)
+
+        return adjustments
+
     def get_recommendation_history(self):
         connection = sqlite3.connect(self.database_name)
         cursor = connection.cursor()

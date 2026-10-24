@@ -2509,6 +2509,34 @@ imported by:
 </div>
 
 <div class="node">
+  <a name="adapters"></a>
+  <a target="code" href="///C:/Users/Rober/source/repos/JacobsRobertL/Advanced-Software-Engineering/K-Pop%20Music%20Discovery/K-Pop%20Music%20Discovery/adapters/__init__.py" type="text/plain"><tt>adapters</tt></a>
+<span class="moduletype">Package</span>  <div class="import">
+imported by:
+    <a href="#adapters.musicbrainz_adapter">adapters.musicbrainz_adapter</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="adapters.musicbrainz_adapter"></a>
+  <a target="code" href="///C:/Users/Rober/source/repos/JacobsRobertL/Advanced-Software-Engineering/K-Pop%20Music%20Discovery/K-Pop%20Music%20Discovery/adapters/musicbrainz_adapter.py" type="text/plain"><tt>adapters.musicbrainz_adapter</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#adapters">adapters</a>
+ &#8226;   <a href="#api.musicbrainz_client">api.musicbrainz_client</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#ui.app_window">ui.app_window</a>
+
+  </div>
+
+</div>
+
+<div class="node">
   <a name="annotationlib"></a>
   <a target="code" href="///C:/Users/Rober/AppData/Local/Python/pythoncore-3.14-64/Lib/annotationlib.py" type="text/plain"><tt>annotationlib</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
@@ -2542,6 +2570,7 @@ imported by:
 <span class="moduletype">Package</span>  <div class="import">
 imported by:
     <a href="#api.lastfm_client">api.lastfm_client</a>
+ &#8226;   <a href="#api.musicbrainz_client">api.musicbrainz_client</a>
 
   </div>
 
@@ -2564,6 +2593,23 @@ imports:
 imported by:
     <a href="#services.recommendation_service">services.recommendation_service</a>
  &#8226;   <a href="#ui.app_window">ui.app_window</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="api.musicbrainz_client"></a>
+  <a target="code" href="///C:/Users/Rober/source/repos/JacobsRobertL/Advanced-Software-Engineering/K-Pop%20Music%20Discovery/K-Pop%20Music%20Discovery/api/musicbrainz_client.py" type="text/plain"><tt>api.musicbrainz_client</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#api">api</a>
+ &#8226;   <a href="#requests">requests</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#adapters.musicbrainz_adapter">adapters.musicbrainz_adapter</a>
 
   </div>
 
@@ -4051,6 +4097,7 @@ imports:
     <a href="#database">database</a>
  &#8226;   <a href="#os">os</a>
  &#8226;   <a href="#pathlib">pathlib</a>
+ &#8226;   <a href="#services.recommendation_service">services.recommendation_service</a>
  &#8226;   <a href="#sqlite3">sqlite3</a>
 
   </div>
@@ -11733,6 +11780,7 @@ imports:
   <div class="import">
 imported by:
     <a href="#api.lastfm_client">api.lastfm_client</a>
+ &#8226;   <a href="#api.musicbrainz_client">api.musicbrainz_client</a>
  &#8226;   <a href="#requests">requests</a>
  &#8226;   <a href="#requests.__version__">requests.__version__</a>
  &#8226;   <a href="#requests._internal_utils">requests._internal_utils</a>
@@ -11751,6 +11799,8 @@ imported by:
  &#8226;   <a href="#requests.status_codes">requests.status_codes</a>
  &#8226;   <a href="#requests.structures">requests.structures</a>
  &#8226;   <a href="#requests.utils">requests.utils</a>
+ &#8226;   <a href="#services.recommendation_service">services.recommendation_service</a>
+ &#8226;   <a href="#ui.app_window">ui.app_window</a>
 
   </div>
 
@@ -12387,12 +12437,15 @@ imported by:
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
     <a href="#api.lastfm_client">api.lastfm_client</a>
+ &#8226;   <a href="#requests">requests</a>
  &#8226;   <a href="#services">services</a>
+ &#8226;   <a href="#time">time</a>
 
   </div>
   <div class="import">
 imported by:
-    <a href="#ui.app_window">ui.app_window</a>
+    <a href="#database.db_repository">database.db_repository</a>
+ &#8226;   <a href="#ui.app_window">ui.app_window</a>
 
   </div>
 
@@ -17113,6 +17166,7 @@ imported by:
  &#8226;   <a href="#requests.auth">requests.auth</a>
  &#8226;   <a href="#requests.cookies">requests.cookies</a>
  &#8226;   <a href="#requests.sessions">requests.sessions</a>
+ &#8226;   <a href="#services.recommendation_service">services.recommendation_service</a>
  &#8226;   <a href="#setuptools._vendor.backports.tarfile">setuptools._vendor.backports.tarfile</a>
  &#8226;   <a href="#setuptools._vendor.jaraco.functools">setuptools._vendor.jaraco.functools</a>
  &#8226;   <a href="#setuptools._vendor.more_itertools.more">setuptools._vendor.more_itertools.more</a>
@@ -17147,6 +17201,7 @@ imports:
  &#8226;   <a href="#re">re</a>
  &#8226;   <a href="#sys">sys</a>
  &#8226;   <a href="#tkinter.constants">tkinter.constants</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
  &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
  &#8226;   <a href="#traceback">traceback</a>
  &#8226;   <a href="#types">types</a>
@@ -17155,9 +17210,27 @@ imports:
   </div>
   <div class="import">
 imported by:
-    <a href="#tkinter.constants">tkinter.constants</a>
+    <a href="#tkinter.commondialog">tkinter.commondialog</a>
+ &#8226;   <a href="#tkinter.constants">tkinter.constants</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
  &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
  &#8226;   <a href="#ui.app_window">ui.app_window</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="tkinter.commondialog"></a>
+  <a target="code" href="///C:/Users/Rober/AppData/Local/Python/pythoncore-3.14-64/Lib/tkinter/commondialog.py" type="text/plain"><tt>tkinter.commondialog</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#tkinter">tkinter</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#tkinter.messagebox">tkinter.messagebox</a>
 
   </div>
 
@@ -17174,6 +17247,24 @@ imports:
   <div class="import">
 imported by:
     <a href="#tkinter">tkinter</a>
+
+  </div>
+
+</div>
+
+<div class="node">
+  <a name="tkinter.messagebox"></a>
+  <a target="code" href="///C:/Users/Rober/AppData/Local/Python/pythoncore-3.14-64/Lib/tkinter/messagebox.py" type="text/plain"><tt>tkinter.messagebox</tt></a>
+<span class="moduletype">SourceModule</span>  <div class="import">
+imports:
+    <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.commondialog">tkinter.commondialog</a>
+
+  </div>
+  <div class="import">
+imported by:
+    <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#ui.app_window">ui.app_window</a>
 
   </div>
 
@@ -17752,9 +17843,12 @@ imported by:
   <a target="code" href="///C:/Users/Rober/source/repos/JacobsRobertL/Advanced-Software-Engineering/K-Pop%20Music%20Discovery/K-Pop%20Music%20Discovery/ui/app_window.py" type="text/plain"><tt>ui.app_window</tt></a>
 <span class="moduletype">SourceModule</span>  <div class="import">
 imports:
-    <a href="#api.lastfm_client">api.lastfm_client</a>
+    <a href="#adapters.musicbrainz_adapter">adapters.musicbrainz_adapter</a>
+ &#8226;   <a href="#api.lastfm_client">api.lastfm_client</a>
+ &#8226;   <a href="#requests">requests</a>
  &#8226;   <a href="#services.recommendation_service">services.recommendation_service</a>
  &#8226;   <a href="#tkinter">tkinter</a>
+ &#8226;   <a href="#tkinter.messagebox">tkinter.messagebox</a>
  &#8226;   <a href="#tkinter.ttk">tkinter.ttk</a>
  &#8226;   <a href="#ui">ui</a>
 

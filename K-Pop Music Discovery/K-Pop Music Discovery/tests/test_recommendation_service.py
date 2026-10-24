@@ -15,7 +15,8 @@ from services.recommendation_service import (
     get_selectable_song_tags,
     score_recommendations,
     normalize_tag,
-    enrich_recommendations
+    enrich_recommendations,
+    apply_rating_adjustments
 )
 
 def test_get_candidate_tracks():
@@ -380,3 +381,17 @@ def test_enrich_recommendations_handles_api_failure():
     assert len(result) == 1
     assert result[0]["title"] == "WOKE UP"
     assert "musicbrainz_id" not in result[0]
+
+def test_apply_rating_adjustments():
+    recommendations = [
+        {"title": "Song A", "artist": "XG", "score": 1},
+        {"title": "Song B", "artist": "aespa", "score": 3},
+        {"title": "Song C", "artist": "TWICE", "score": 2}
+    ]
+
+    adjustments = {"xg": 2, "aespa": -2}
+
+    results = apply_rating_adjustments(recommendations, adjustments)
+
+    assert [track["title"] for track in results] == ["Song A", "Song C", "Song B"]
+    assert [track["score"] for track in results] == [3, 2, 1]

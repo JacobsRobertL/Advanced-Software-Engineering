@@ -160,3 +160,73 @@ def test_equivalent_tag_preferences(tmp_path):
     assert db.has_equivalent_tag("HIP HOP") is True
     assert db.has_equivalent_tag("hip-hop") is True
     assert db.has_equivalent_tag("dance") is False
+
+def test_save_rating(tmp_path):
+    db = DatabaseRepository()
+    db.database_name = tmp_path / "test_kpop.db"
+    db.initialize_database()
+
+    db.save_recommendation("WOKE UP", "XG")
+
+    db.save_rating("WOKE UP", "XG", 5)
+    db.save_rating("WOKE UP", "XG", 3)
+
+    import sqlite3
+
+    connection = sqlite3.connect(db.database_name)
+    ratings = connection.execute("SELECT rating FROM ratings").fetchall()
+    connection.close()
+
+    assert ratings == [(3,)]
+
+def test_get_song_rating(tmp_path):
+    db = DatabaseRepository()
+    db.database_name = tmp_path / "test_kpop.db"
+    db.initialize_database()
+
+    db.save_recommendation("WOKE UP", "XG")
+    db.save_recommendation("Drama", "aespa")
+
+    db.save_rating("WOKE UP", "XG", 5)
+
+    assert db.get_song_rating("WOKE UP", "XG") == 5
+    assert db.get_song_rating("Drama", "aespa") is None
+    assert db.get_song_rating("Nonexistent Song", "XG") is None
+
+    db.save_rating("WOKE UP", "XG", 3)
+
+    assert db.get_song_rating("WOKE UP", "XG") == 3
+
+def test_get_rated_songs(tmp_path):
+    db = DatabaseRepository()
+    db.database_name = tmp_path / "test_kpop.db"
+    db.initialize_database()
+
+    db.save_recommendation("WOKE UP", "XG")
+    db.save_recommendation("Drama", "aespa")
+
+    db.save_rating("WOKE UP", "XG", 5)
+    db.save_rating("Drama", "aespa", 4)
+
+    assert db.get_rated_songs() == [
+        ("WOKE UP", "XG", 5),
+        ("Drama", "aespa", 4)
+    ]
+
+def test_artist_rating_adjustments(tmp_path):
+    db = DatabaseRepository()
+    db.database_name = tmp_path / "test_kpop.db"
+    db.initialize_database()
+
+    db.save_recommendation("WOKE UP", "XG")
+    db.save_recommendation("SHOOTING STAR", "XG")
+    db.save_recommendation("Drama", "aespa")
+
+    db.save_rating("WOKE UP", "XG", 5)
+    db.save_rating("SHOOTING STAR", "XG", 4)
+    db.save_rating("Drama", "aespa", 1)
+
+    adjustments = db.get_artist_rating_adjustments()
+
+    assert adjustments["xg"] == 2
+    assert adjustments["aespa"] == -2

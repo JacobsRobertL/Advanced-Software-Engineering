@@ -1,4 +1,5 @@
 # Create the main application window and all logic pertaining to the UI
+import requests
 
 import tkinter as tk
 from tkinter import ttk, messagebox
@@ -25,14 +26,15 @@ from services.recommendation_service import (
     get_selectable_song_tags,
     generate_discovery_recommendations,
     score_recommendations,
-    enrich_recommendations
+    enrich_recommendations,
+    apply_rating_adjustments
     )
 
 from adapters.musicbrainz_adapter import MusicBrainzAdapter
 
 # Window presets
 WINDOW_WIDTH = 800
-WINDOW_HEIGHT = 800
+WINDOW_HEIGHT = 900
 WINDOW_TITLE = "K-Pop Music Discovery"
 
 # Creating the main application window class
@@ -53,6 +55,7 @@ class AppWindow(tk.Tk):
 
         self.search_var = tk.StringVar()
         self.search_in_progress = False
+        self.discovery_results = []
 
         # TEMP: This is essentially calling a function which is defined below.  This is a common pattern in Python to keep the constructor clean and organized.
         self._configure_styles()
@@ -67,14 +70,20 @@ class AppWindow(tk.Tk):
     def _configure_styles(self):
         style = ttk.Style(self)
         style.theme_use("clam")
+        self.option_add("*TCombobox*Listbox.selectBackground", "#2563EB")
+        self.option_add("*TCombobox*Listbox.selectForeground", "#FFFFFF")
         style.configure("TFrame", background="#F0F0F0")
         style.configure("TLabel", background="#F0F0F0", foreground="#111827")
+        style.configure("Rating.TCombobox", foreground="#111827", fieldbackground="#FFFFFF", selectforeground="#FFFFFF", selectbackground="#2563EB")
+        style.map("Rating.TCombobox", foreground=[("readonly", "#111827")], fieldbackground=[("readonly", "#FFFFFF")])
         style.configure("Action.TButton", font=("Segoe UI", 10, "bold"), foreground="white", background="#2563EB", bordercolor="#1D4ED8", lightcolor="#2563EB", darkcolor="#1D4ED8", borderwidth=2, relief="raised", padding=(12, 6))
         style.map("Action.TButton", background=[("disabled", "#CBD5E1"), ("pressed", "#1E40AF"), ("active", "#1D4ED8")], foreground=[("disabled", "#64748B"), ("active", "white")], bordercolor=[("pressed", "#1E3A8A"), ("active", "#1E40AF")], relief=[("pressed", "sunken"), ("!pressed", "raised")])
         style.configure("Discover.TButton", font=("Segoe UI", 11, "bold"), foreground="white", background="#7C3AED", bordercolor="#5B21B6", lightcolor="#7C3AED", darkcolor="#5B21B6", borderwidth=2, relief="raised", padding=(24, 10))
         style.map("Discover.TButton", background=[("disabled", "#CBD5E1"), ("pressed", "#5B21B6"), ("active", "#6D28D9")], foreground=[("disabled", "#64748B"), ("active", "white")], bordercolor=[("pressed", "#4C1D95"), ("active", "#5B21B6")], relief=[("pressed", "sunken"), ("!pressed", "raised")])
         style.configure("Clear.TButton", font=("Segoe UI", 9), foreground="#9F3030", background="#FCE8E8", padding=(10,5), borderwidth=1, relief="flat")
         style.map("Clear.TButton", background=[("pressed", "#F5BABA"), ("active", "#F8D5D5")], foreground=[("disabled", "#999999")])
+        style.configure("Ratings.TButton", font=("Segoe UI", 10, "bold"), foreground="white", background="#0D9488", bordercolor="#0F766E", lightcolor="#0D9488", darkcolor="#0F766E", borderwidth=2, relief="raised", padding=(12, 6))
+        style.map("Ratings.TButton", background=[("disabled", "#CBD5E1"), ("pressed", "#115E59"), ("active", "#0F766E")], foreground=[("disabled", "#64748B"), ("active", "white")], bordercolor=[("pressed", "#134E4A"), ("active", "#115E59")])
 
     # TEMP: This only creates the widgets but does not place them.
     def _create_widgets(self):
@@ -112,11 +121,18 @@ class AppWindow(tk.Tk):
        
         self.discovery_label = ttk.Label(self.discovery_header_frame, text="3. Discover Music:", font=("Segoe UI", 11, "bold"))
         self.discovery_frame = ttk.Frame(self)
-        self.discovery_listbox = tk.Listbox(self.discovery_frame, height = 5)
+        self.discovery_listbox = tk.Listbox(self.discovery_frame, height=5, exportselection=False)
         self.discovery_scrollbar = ttk.Scrollbar(self.discovery_frame, orient="vertical", command=self.discovery_listbox.yview)
         self.discovery_listbox.configure(yscrollcommand=self.discovery_scrollbar.set)
+        self.discovery_listbox.bind("<<ListboxSelect>>", self._on_discovery_selected)
+        self.rating_frame = ttk.Frame(self)
+        self.rating_var = tk.StringVar(value="5")
+        self.rating_label = ttk.Label(self.rating_frame, text="Rate selected song:")
+        self.rating_dropdown = ttk.Combobox(self.rating_frame, textvariable=self.rating_var, values=["1", "2", "3", "4", "5"], state="readonly", width=5, style="Rating.TCombobox")
+        self.save_rating_button = ttk.Button(self.rating_frame, text="Save Rating", command=self._on_save_rating, style="Action.TButton")
 
         self.clear_history_button = ttk.Button(self.discovery_header_frame, text="Clear Recommendation History", command=self._on_clear_history, style="Clear.TButton")
+        self.view_ratings_button = ttk.Button(self.rating_frame, text="View Rated Songs", command=self._on_view_rated_songs, style="Ratings.TButton")
         self.clear_preferences_button = ttk.Button(self.preference_header_frame, text="Clear Preference Profile", command=self._on_clear_preferences, style="Clear.TButton")
 
         self.discover_button = ttk.Button(self, text="Discover Music", command=self._on_discover, style="Discover.TButton")
@@ -210,6 +226,11 @@ class AppWindow(tk.Tk):
         self.discovery_frame.pack(padx=20, pady=(5, 5), fill="x")
         self.discovery_listbox.pack(side="left", fill="both", expand=True)
         self.discovery_scrollbar.pack(side="right", fill="y")
+        self.rating_frame.pack(padx=20, pady=(5, 10), fill="x")
+        self.rating_label.pack(side="left", padx=(0, 10))
+        self.rating_dropdown.pack(side="left", padx=(0, 10))
+        self.save_rating_button.pack(side="left")
+        self.view_ratings_button.pack(side="right")
 
 
     # TEMP: This is the function that will be called when the search button is clicked.
@@ -331,6 +352,7 @@ class AppWindow(tk.Tk):
         confirmed = messagebox.askyesno("Clear Recommendation History", "Are you sure you want to clear the recommendation history?\n\nThis action cannot be undone.") 
         if confirmed:
             self.db_repo.clear_recommendation_history()
+            self.discovery_results = []
             self._display_discoveries([])
             messagebox.showinfo("History Cleared", "Recommendation history has been cleared.")
 
@@ -357,9 +379,19 @@ class AppWindow(tk.Tk):
             )
             return
 
-        recommendations = generate_discovery_recommendations(preferred_artists, get_similar_artists, get_top_tracks)
-        recommendations = remove_unusable_tracks(recommendations)
-        recommendations = remove_duplicate_recommendations(recommendations)
+        try:
+            recommendations = generate_discovery_recommendations(preferred_artists, get_similar_artists, get_top_tracks)
+            recommendations = remove_unusable_tracks(recommendations)
+            recommendations = remove_duplicate_recommendations(recommendations)
+        except (requests.exceptions.RequestException, ValueError, KeyError, TypeError) as error:
+            messagebox.showerror("Discovery Error", f"Unable to retrieve recommendations.\n\n{error}")
+            return
+
+        if not recommendations:
+            self.discovery_results = []
+            self._display_discoveries([])
+            messagebox.showinfo("No Recommendations", "No usable recommendations were found. Try another artist preference.")
+            return
 
         history = self.db_repo.get_recommendation_history()
         recommendations = remove_previously_recommended(recommendations, history)
@@ -367,12 +399,23 @@ class AppWindow(tk.Tk):
         if preferred_tags and recommendations:
             recommendations = add_track_tags(recommendations, get_song_tags)
 
+        print("PREFERRED TAGS:", preferred_tags)
+        for track in recommendations:
+            if track["title"].strip().casefold() == "left right":
+                print("LEFT RIGHT DISCOVERY DATA:", track)
         recommendations = score_recommendations(recommendations, preferred_tags)
+        print("LEFT RIGHT TAG SCORE:", [(track["title"], track["score"]) for track in recommendations if track["title"].strip().casefold() == "left right"])
+
+        artist_adjustments = self.db_repo.get_artist_rating_adjustments()
+        print("ARTIST RATING ADJUSTMENTS:", artist_adjustments)
+        recommendations = apply_rating_adjustments(recommendations, artist_adjustments)
 
         adapter = MusicBrainzAdapter()
         recommendations = enrich_recommendations(recommendations, adapter, limit=3)
 
         save_generated_recommendations(recommendations, self.db_repo.save_recommendation)
+        self.discovery_results = recommendations
+        print("Stored discovery records:", len(self.discovery_results))
         
         display_results = []
 
@@ -469,3 +512,50 @@ class AppWindow(tk.Tk):
 
         ttk.Button(buttons_frame, text="Cancel", command=popup.destroy).pack(side="left", padx=5)
         ttk.Button(buttons_frame, text="Add Selected Tags", style="Action.TButton", command=save_selected_tags).pack(side="left", padx=5)
+
+    def _on_discovery_selected(self, event):
+        selection = self.discovery_listbox.curselection()
+
+        if not selection:
+            return
+
+        track = self.discovery_results[selection[0]]
+        existing_rating = self.db_repo.get_song_rating(track["title"], track["artist"])
+
+        self.rating_var.set(str(existing_rating) if existing_rating is not None else "5")
+
+
+    def _on_save_rating(self):
+        selection = self.discovery_listbox.curselection()
+
+        if not selection:
+            messagebox.showinfo("No Song Selected", "Please select a discovered song first.")
+            return
+
+        track = self.discovery_results[selection[0]]
+        rating = int(self.rating_var.get())
+
+        self.db_repo.save_rating(track["title"], track["artist"], rating)
+
+        messagebox.showinfo("Rating Saved", f"Rated {track['title']} by {track['artist']}: {rating}/5")
+
+    def _on_view_rated_songs(self):
+        rated_songs = self.db_repo.get_rated_songs()
+
+        popup = tk.Toplevel(self)
+        popup.title("Previously Rated Songs")
+        popup.geometry("500x350")
+        popup.resizable(False, False)
+
+        ttk.Label(popup, text="Your Rated Songs", font=("Segoe UI", 14, "bold")).pack(pady=(15, 10))
+
+        ratings_listbox = tk.Listbox(popup, height=12)
+        ratings_listbox.pack(fill="both", expand=True, padx=20, pady=(0, 10))
+
+        if not rated_songs:
+            ratings_listbox.insert(tk.END, "No songs have been rated yet.")
+        else:
+            for title, artist, rating in rated_songs:
+                ratings_listbox.insert(tk.END, f"{title} — {artist} | Rating: {rating}/5")
+
+        ttk.Button(popup, text="Close", command=popup.destroy).pack(pady=(0, 15))

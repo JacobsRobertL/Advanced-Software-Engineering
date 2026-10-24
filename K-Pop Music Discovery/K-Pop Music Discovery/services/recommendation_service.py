@@ -81,6 +81,14 @@ def score_recommendations(recommendations, preferred_tags):
 
     return sorted(recommendations, key=lambda track: track["score"], reverse=True)
 
+def apply_rating_adjustments(recommendations, artist_adjustments):
+    for track in recommendations:
+        artist_key = track["artist"].strip().casefold()
+        adjustment = artist_adjustments.get(artist_key, 0)
+        track["score"] = track.get("score", 0) + adjustment
+
+    return sorted(recommendations, key=lambda track: track["score"], reverse=True)
+
 def enrich_recommendations(recommendations, metadata_provider, limit=3):
     for index, track in enumerate(recommendations[:limit]):
         if index > 0:
